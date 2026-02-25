@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        :root { --primary: #FF8C00; --navy: #0A1120; --card-navy: #161C2D; --white: #FFFFFF; --txt-dim: #94A3B8; --success: #10B981; --danger: #EF4444; }
+        :root { --primary: #FF8C00; --navy: #0A1120; --card-navy: #161C2D; --white: #FFFFFF; --txt-dim: #94A3B8; --success: #10B981; --danger: #EF4444; --info: #3B82F6; }
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Outfit', sans-serif; background: var(--navy); color: var(--white); padding-bottom: 140px; overflow-x: hidden; }
         #registration-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #161C2D 0%, #0A1120 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -27,6 +27,12 @@
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--txt-dim); margin: 0 0 8px 5px; letter-spacing: 1px; }
         select, input { width: 100%; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; color: var(--white); margin-bottom: 15px; font-family: inherit; }
         .btn-main { width: 100%; padding: 18px; border: none; border-radius: 20px; background: var(--primary); color: white; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); }
+        .btn-success { background: var(--success); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); width: 100%; }
+        .btn-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn-small { padding: 12px; border-radius: 15px; border: none; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none; }
+        .btn-cancel { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); width: 100%; }
+        .btn-chat { background: #25D366; color: white; }
+        .btn-track { background: var(--info); color: white; }
         .mission-card { background: var(--card-navy); padding: 1.5rem; border-radius: 24px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.03); }
         .pill { font-size: 0.65rem; font-weight: 900; padding: 5px 12px; border-radius: 10px; background: rgba(255, 140, 0, 0.15); color: var(--primary); display: inline-block; margin-bottom: 12px; }
         .secure-box { background: rgba(16, 185, 129, 0.05); border: 1px dashed var(--success); padding: 18px; border-radius: 20px; margin-top: 15px; text-align: center; }
@@ -46,7 +52,7 @@
         <p style="font-size: 0.85rem; color: var(--txt-dim); margin-bottom: 25px;">Hostel life, sorted.</p>
         <div style="text-align: left;">
             <label>Display Name</label>
-            <input type="text" id="u-name" placeholder="e.g. Jewel">
+            <input type="text" id="u-name" placeholder="e.g. KAKA RAO👺">
             <label>Mobile Number</label>
             <input type="tel" id="u-phone" maxlength="10" placeholder="10-digit number">
         </div>
@@ -93,7 +99,7 @@
         newData.forEach(m => {
             const oldM = database.find(o => o.id === m.id);
             if (m.phone === currentUserPhone && m.runnerAgreed && (!oldM || !oldM.runnerAgreed)) {
-                alert(`WOW! Match Found: ${m.rName} is bringing your ${m.task}! 🚀`);
+                alert(`MATCH! ${m.rName} has accepted your ${m.task}! 🚀`);
             }
         });
         database = newData;
@@ -105,7 +111,7 @@
         const now = Date.now();
         database.forEach(m => {
             if (m.expiryTime && now > m.expiryTime) { db.collection("missions").doc(m.id).delete(); }
-            if (m.connectedAt && now > (m.connectedAt + (5 * 60 * 1000))) { db.collection("missions").doc(m.id).delete(); }
+            if (m.connectedAt && now > (m.connectedAt + (30 * 60 * 1000))) { db.collection("missions").doc(m.id).delete(); }
         });
     }
 
@@ -116,6 +122,11 @@
         currentUser = name; currentUserPhone = phone;
         localStorage.setItem('buddyRunnerPhone', phone); localStorage.setItem('buddyRunnerName', name);
         showApp();
+    }
+
+    function removeMission(id, type) {
+        const msg = type === 'complete' ? "Mark task as completed?" : "Delete this request?";
+        if(confirm(msg)) db.collection("missions").doc(id).delete();
     }
 
     function logout() { if(confirm("Exit Radar?")) { localStorage.clear(); location.reload(); } }
@@ -145,10 +156,10 @@
         db.collection("missions").add({
             type: currentTab, hub: document.getElementById('f-hub')?.value || document.getElementById('f-airport')?.value,
             task, pay: document.getElementById('f-pay')?.value || "Split",
-            expiryTime: Date.now() + (mins * 60 * 1000), timeLabel: mins + "M duration",
+            expiryTime: Date.now() + (mins * 60 * 1000), 
             user: currentUser, phone: currentUserPhone,
             runnerAgreed: false, rName: "", rPhone: "", connectedAt: null, lat: null, lng: null
-        }).then(() => alert("Mission live on campus radar!"));
+        }).then(() => alert("Mission live!"));
     }
 
     function startTracking(id) {
@@ -160,7 +171,6 @@
     }
 
     function handleHandshake(id) {
-        // Direct Match Logic - No secondary acceptance needed
         db.collection("missions").doc(id).update({ 
             runnerAgreed: true, 
             rName: currentUser, 
@@ -175,43 +185,47 @@
             <label>Hub Location</label><select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option></select>
             <input type="text" id="f-task" placeholder="e.g. Amazon Pickup">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                <div><label>Duration</label><select id="f-timer"><option value="30">30M</option><option value="60">1H</option></select></div>
+                <div><label>Vanish in</label><select id="f-timer"><option value="30">30M</option><option value="60">1H</option><option value="120">2H</option></select></div>
                 <div><label>Bounty (₹)</label><input type="number" id="f-pay" placeholder="30"></div>
             </div>
             <button onclick="postMission()" class="btn-main">Broadcast Errand</button>` : `
             <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad</option></select>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                <div><label>Duration</label><select id="f-timer"><option value="60">1H</option><option value="120">2H</option></select></div>
+                <div><label>Vanish in</label><select id="f-timer"><option value="60">1H</option><option value="120">2H</option></select></div>
                 <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="Pillar #"></div>
             </div>
             <button onclick="postMission()" class="btn-main">Find Ride Partner</button>`;
 
         const feed = document.getElementById('mission-feed');
         feed.innerHTML = '';
-        
         const filtered = database.filter(m => m.type === currentTab && (isRunner ? m.phone !== currentUserPhone : m.phone === currentUserPhone));
         
         if(filtered.length === 0) feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar is clear.</div>`;
 
         filtered.forEach(m => {
             const card = document.createElement('div'); card.className = 'mission-card';
-            card.innerHTML = isRunner ? `
+            if(isRunner) {
+                card.innerHTML = `
                 <div class="pill">${m.hub}</div>
                 <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between;"><span>${m.task}</span><span>₹${m.pay}</span></div>
                 <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px;">👤 ${m.user}</div>
-                ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}')" class="btn-main" style="margin-top:15px; padding:12px;">Help this Buddy</button>` : 
-                `<div class="secure-box">Connected!<br>📞 ${m.phone}</div>`}` : `
+                ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}')" class="btn-main" style="margin-top:15px; padding:12px;">Help Buddy</button>` : 
+                `<div class="btn-action-row"><a href="https://wa.me/91${m.phone}" class="btn-small btn-chat">WhatsApp</a><div class="secure-box" style="margin-top:0; padding:12px;">Matched!</div></div>`}`;
+            } else {
+                card.innerHTML = `
                 <div class="pill">My Active Post</div>
                 <div style="font-weight:800; font-size:1.1rem;">${m.hub} ➔ ${m.task}</div>
-                
-                ${m.lat ? `
-                <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid var(--success);">
-                    <div style="font-size:0.6rem; color:var(--success); font-weight:800;">🛰️ BUDDY TRACKING ACTIVE</div>
-                    <a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" style="display:block; text-decoration:none; color:var(--white); font-size:0.75rem; margin-top:5px; font-weight:600;">📍 Click to see Buddy on Map</a>
-                </div>` : ''}
-
-                ${m.runnerAgreed ? `<div class="secure-box"><b>${m.rName}</b> is on the way!<br>📞 ${m.rPhone}<br><small>Task finishes in 5M</small></div>` : 
-                `<div style="font-size:0.7rem; color:var(--txt-dim); margin-top:10px; text-align:center;">📡 Waiting for a buddy runner...</div>`}`;
+                ${m.lat ? `<div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid var(--success);"><div style="font-size:0.6rem; color:var(--success); font-weight:800;">🛰️ TRACKING ACTIVE</div><a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" style="display:block; color:white; font-size:0.75rem; margin-top:5px; font-weight:600;">📍 Open Map</a></div>` : ''}
+                ${m.runnerAgreed ? `
+                <div class="secure-box"><b>${m.rName}</b> is helping!<br>
+                    <div class="btn-action-row">
+                        <a href="https://wa.me/91${m.rPhone}" class="btn-small btn-chat">Chat</a>
+                        <button onclick="removeMission('${m.id}', 'complete')" class="btn-small btn-success" style="color:white;">Completed</button>
+                    </div>
+                </div>` : 
+                `<button onclick="removeMission('${m.id}', 'cancel')" class="btn-small btn-cancel" style="margin-top:10px;">Cancel (Mistake)</button>`}
+                `;
+            }
             feed.appendChild(card);
         });
     }
