@@ -63,8 +63,10 @@
 <div class="container" id="app-body" style="display:none;">
     <header>
         <div style="font-weight: 800; font-size: 1.3rem;">Buddy<span>Runner</span></div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div id="u-display" style="font-size:0.7rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 12px; border-radius: 10px;"></div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="enableNotifications()" style="background:none; border:none; font-size:1.1rem; cursor:pointer;">🔔</button>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScN2j1rEhMBBlh28jWtbkvazL0zUZQ7y3otBTkROAmkfzQDKA/viewform?usp=publish-editor" target="_blank" style="text-decoration:none; font-size:0.6rem; font-weight:800; color:var(--white); background: var(--info); padding: 6px 10px; border-radius: 10px;">Feedback</a>
+            <div id="u-display" style="font-size:0.6rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 10px; border-radius: 10px;"></div>
             <button onclick="logout()" class="logout-btn">Exit</button>
         </div>
     </header>
@@ -99,7 +101,15 @@
         newData.forEach(m => {
             const oldM = database.find(o => o.id === m.id);
             if (m.phone === currentUserPhone && m.runnerAgreed && (!oldM || !oldM.runnerAgreed)) {
+                // System Alert
                 alert(`MATCH! ${m.rName} has accepted your ${m.task}! 🚀`);
+                // Browser Notification
+                if (Notification.permission === "granted") {
+                    new Notification("Buddy Found! 🚀", {
+                        body: `${m.rName} accepted your request. Tap to open.`,
+                        vibrate: [200, 100, 200]
+                    });
+                }
             }
         });
         database = newData;
@@ -113,6 +123,16 @@
             if (m.expiryTime && now > m.expiryTime) { db.collection("missions").doc(m.id).delete(); }
             if (m.connectedAt && now > (m.connectedAt + (30 * 60 * 1000))) { db.collection("missions").doc(m.id).delete(); }
         });
+    }
+
+    function enableNotifications() {
+        if (!("Notification" in window)) {
+            alert("Notifications not supported in this browser.");
+        } else {
+            Notification.requestPermission().then(p => {
+                if (p === "granted") new Notification("Notifications Active!", {body: "We'll ping you when a match is found."});
+            });
+        }
     }
 
     function saveUser() {
@@ -215,7 +235,7 @@
                 card.innerHTML = `
                 <div class="pill">My Active Post</div>
                 <div style="font-weight:800; font-size:1.1rem;">${m.hub} ➔ ${m.task}</div>
-                ${m.lat ? `<div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid var(--success);"><div style="font-size:0.6rem; color:var(--success); font-weight:800;">🛰️ TRACKING ACTIVE</div><a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" style="display:block; color:white; font-size:0.75rem; margin-top:5px; font-weight:600;">📍 Open Map</a></div>` : ''}
+                ${m.lat ? `<div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid var(--success);"><div style="font-size:0.6rem; color:var(--success); font-weight:800;">🛰️ TRACKING ACTIVE</div><a href="http://googleusercontent.com/maps.google.com/maps?q=${m.lat},${m.lng}" target="_blank" style="display:block; color:white; font-size:0.75rem; margin-top:5px; font-weight:600;">📍 Open Map</a></div>` : ''}
                 ${m.runnerAgreed ? `
                 <div class="secure-box"><b>${m.rName}</b> is helping!<br>
                     <div class="btn-action-row">
