@@ -5,22 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BuddyRunner | Campus OS</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        :root { --primary: #FF8C00; --navy: #0A1120; --card-navy: #161C2D; --white: #FFFFFF; --txt-dim: #94A3B8; --success: #10B981; }
+        :root { --primary: #FF8C00; --navy: #0A1120; --card-navy: #161C2D; --white: #FFFFFF; --txt-dim: #94A3B8; --success: #10B981; --danger: #EF4444; }
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Outfit', sans-serif; background: var(--navy); color: var(--white); padding-bottom: 140px; overflow-x: hidden; }
         
+        /* Motion Logo Screen */
         #registration-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #161C2D 0%, #0A1120 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .reg-card { background: var(--card-navy); padding: 40px 30px; border-radius: 32px; width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .text-logo { font-size: 2.2rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px; }
+        .reg-card { background: var(--card-navy); padding: 40px 30px; border-radius: 32px; width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .text-logo { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1.5px; animation: float 3s ease-in-out infinite; }
         .text-logo span { color: var(--primary); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         .container { max-width: 450px; margin: 0 auto; padding: 1.2rem; }
-        header { padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; background: rgba(10, 17, 32, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        header { padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; background: rgba(10, 17, 32, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
 
         .tab-nav { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 20px; display: flex; position: relative; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
         .tab-btn { flex: 1; padding: 12px; text-align: center; font-weight: 800; cursor: pointer; z-index: 2; color: var(--txt-dim); font-size: 0.85rem; }
@@ -30,7 +31,7 @@
         .glass-card { background: var(--card-navy); padding: 25px; border-radius: 28px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.03); }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--txt-dim); margin: 0 0 8px 5px; letter-spacing: 1px; }
         select, input { width: 100%; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; color: var(--white); margin-bottom: 15px; font-family: inherit; }
-        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 20px; background: var(--primary); color: white; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
+        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 20px; background: var(--primary); color: white; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); }
         
         .mission-card { background: var(--card-navy); padding: 1.5rem; border-radius: 24px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.03); }
         .pill { font-size: 0.65rem; font-weight: 900; padding: 5px 12px; border-radius: 10px; background: rgba(255, 140, 0, 0.15); color: var(--primary); display: inline-block; margin-bottom: 12px; }
@@ -40,6 +41,7 @@
         .toggle-switch { width: 56px; height: 32px; background: rgba(0,0,0,0.15); border-radius: 20px; position: relative; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
         .toggle-circle { width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 4px; transition: 0.3s; }
         .active-toggle .toggle-circle { transform: translateX(24px); }
+        .logout-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 0.7rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -47,22 +49,37 @@
 <div id="registration-screen">
     <div class="reg-card">
         <div class="text-logo">Buddy<span>Runner</span></div>
-        <p style="font-size:0.9rem; color:var(--txt-dim); margin-bottom:25px;">Campus OS for hyperlocal logistics.</p>
+        
+        <p style="font-size: 1rem; color: var(--white); font-weight: 600; margin-bottom: 5px;">
+            Exclusive radar for IMT Hyderabad.
+        </p>
+        <p style="font-size: 0.85rem; color: var(--txt-dim); margin-bottom: 25px;">
+            Hostel life, sorted.
+        </p>
+
         <div style="text-align: left;">
-            <label>Full Name 
-</label>
-            <input type="text" id="u-name" placeholder="Pushpa">
-            <label>Mobile Number</label>
+            <label>Display Name</label>
+            <input type="text" id="u-name" placeholder="e.g. KAKA ROA👺">
+            
+            <label>Mobile Number (Radar ID)</label>
             <input type="tel" id="u-phone" maxlength="10" placeholder="10-digit number">
         </div>
-        <button onclick="saveUser()" class="btn-main">Connect Hub</button>
+
+        <button onclick="saveUser()" class="btn-main">Enter Radar</button>
+        
+        <p style="font-size: 0.6rem; color: var(--txt-dim); margin-top: 15px; opacity: 0.6;">
+            ⚡ Instant access. No OTP required.
+        </p>
     </div>
 </div>
 
 <div class="container" id="app-body" style="display:none;">
-    <header style="margin-bottom:20px; padding:0;">
-        <div style="font-weight: 800; font-size: 1.4rem;">Buddy<span style="color:var(--primary)">Runner</span></div>
-        <div id="u-display" style="font-size:0.75rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 12px; border-radius: 12px;"></div>
+    <header>
+        <div style="font-weight: 800; font-size: 1.3rem;">Buddy<span>Runner</span></div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div id="u-display" style="font-size:0.7rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 12px; border-radius: 10px;"></div>
+            <button onclick="logout()" class="logout-btn">Exit</button>
+        </div>
     </header>
 
     <div class="tab-nav">
@@ -72,14 +89,14 @@
     </div>
 
     <div class="glass-card" id="form-content"></div>
-    <h3 style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.8rem; letter-spacing: 1px;">ACTIVE RADAR</h3>
+    <h3 style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.75rem; letter-spacing: 1px;">ACTIVE RADAR</h3>
     <div id="mission-feed"></div>
 </div>
 
-<div class="bottom-bar" id="mode-bar">
+<div class="bottom-bar" id="mode-bar" style="display:none;">
     <div class="mode-info">
-        <h4 id="m-status">Mode: Requester</h4>
-        <p style="font-size:0.7rem; color:rgba(255,255,255,0.8)">Account Linked via Number</p>
+        <h4 id="m-status" style="font-size:0.95rem; font-weight:800;">Mode: Requester</h4>
+        <p style="font-size:0.65rem; color:rgba(255,255,255,0.8)">Account Linked via Number</p>
     </div>
     <div class="toggle-switch" id="role-switch" onclick="toggleRole()">
         <div class="toggle-circle"></div>
@@ -113,20 +130,10 @@
     };
 
     db.collection("missions").onSnapshot((snapshot) => {
-        let newDocs = snapshot.docChanges().filter(c => c.type === 'added').map(c => c.doc.data());
-        if(newDocs.length > 0 && isRunner && newDocs[0].phone !== currentUserPhone) {
-             sendNotification("New Mission!", newDocs[0].task);
-        }
         database = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         processVanishLogic();
         render();
     });
-
-    function sendNotification(title, body) {
-        if (Notification.permission === "granted") {
-            new Notification(title, { body });
-        }
-    }
 
     function processVanishLogic() {
         const now = Date.now();
@@ -137,19 +144,28 @@
     }
 
     function saveUser() {
-        currentUser = document.getElementById('u-name').value || "Student";
-        currentUserPhone = document.getElementById('u-phone').value;
-        if(currentUserPhone.length !== 10) return alert("10-digit number required.");
+        const name = document.getElementById('u-name').value.trim();
+        const phone = document.getElementById('u-phone').value.trim();
+        if(!name || phone.length !== 10) return alert("Valid name and 10-digit number required.");
         
-        localStorage.setItem('buddyRunnerPhone', currentUserPhone);
-        localStorage.setItem('buddyRunnerName', currentUser);
-        Notification.requestPermission();
+        currentUser = name;
+        currentUserPhone = phone;
+        localStorage.setItem('buddyRunnerPhone', phone);
+        localStorage.setItem('buddyRunnerName', name);
         showApp();
+    }
+
+    function logout() {
+        if(confirm("Logout from Radar?")) {
+            localStorage.clear();
+            location.reload();
+        }
     }
 
     function showApp() {
         document.getElementById('registration-screen').style.display = 'none';
         document.getElementById('app-body').style.display = 'block';
+        document.getElementById('mode-bar').style.display = 'flex';
         document.getElementById('u-display').innerText = currentUser.toUpperCase();
         render();
     }
@@ -163,7 +179,7 @@
     function toggleRole() {
         isRunner = !isRunner;
         document.getElementById('role-switch').classList.toggle('active-toggle');
-        document.getElementById('m-status').innerText = isRunner ? "Mode: Going Out" : "Mode: Requester";
+        document.getElementById('m-status').innerText = isRunner ? "Mode: Helper" : "Mode: Requester";
         render();
     }
 
@@ -183,7 +199,7 @@
             runnerAgreed: false, requesterAgreed: false, rName: "", rPhone: "",
             connectedAt: null
         });
-        alert("Mission Broadcasted!");
+        alert("Mission Live on Radar!");
     }
 
     function handleHandshake(id, role) {
@@ -198,23 +214,30 @@
     function render() {
         const form = document.getElementById('form-content');
         form.innerHTML = currentTab === 'errand' ? `
-            <label>Hub Location</label><select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ The Adda</option><option>☕ The Tapri</option></select>
-            <input type="text" id="f-task" placeholder="Task Name (Mandatory)">
+            <label>Hub Location</label><select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option></select>
+            <input type="text" id="f-task" placeholder="e.g. Amazon Pickup">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                <div><label>Duration *</label><select id="f-timer"><option value="15">15M</option><option value="30">30M</option><option value="60">1H</option></select></div>
+                <div><label>Duration</label><select id="f-timer"><option value="15">15M</option><option value="30">30M</option><option value="60">1H</option></select></div>
                 <div><label>Bounty (₹)</label><input type="number" id="f-pay" placeholder="30"></div>
             </div>
             <button onclick="postMission()" class="btn-main">Broadcast Errand</button>` : `
-            <label>Pickup Hub</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad Stn</option></select>
+            <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad Stn</option></select>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                <div><label>Duration *</label><select id="f-timer"><option value="60">1H</option><option value="120">2H</option></select></div>
-                <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="Gate #"></div>
+                <div><label>Duration</label><select id="f-timer"><option value="60">1H</option><option value="120">2H</option></select></div>
+                <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="e.g. Pillar 12"></div>
             </div>
-            <button onclick="postMission()" class="btn-main">Find Partner</button>`;
+            <button onclick="postMission()" class="btn-main">Find Cab Buddy</button>`;
 
         const feed = document.getElementById('mission-feed');
         feed.innerHTML = '';
-        database.filter(m => m.type === currentTab && (isRunner ? m.phone !== currentUserPhone : m.phone === currentUserPhone)).forEach(m => {
+        
+        const filtered = database.filter(m => m.type === currentTab && (isRunner ? m.phone !== currentUserPhone : m.phone === currentUserPhone));
+        
+        if(filtered.length === 0) {
+            feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar is clear. Be the first to post!</div>`;
+        }
+
+        filtered.forEach(m => {
             const card = document.createElement('div');
             card.className = 'mission-card';
             const connected = m.runnerAgreed && m.requesterAgreed;
@@ -222,7 +245,7 @@
                 <div class="pill">${m.hub}</div>
                 <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between;"><span>${m.task}</span><span style="color:var(--primary)">₹${m.pay}</span></div>
                 <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:10px;">👤 ${m.user} | ⏳ ${m.timeLabel}</div>
-                ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}', 'runner')" class="btn-main" style="margin-top:15px; padding:12px; font-size:0.85rem;">Accept Request</button>` : `<div class="secure-box">${m.requesterAgreed ? `📞 ${m.phone}<br><small>Vanish in 5M</small>` : 'Waiting for Handshake...'}</div>`}` : `
+                ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}', 'runner')" class="btn-main" style="margin-top:15px; padding:12px; font-size:0.85rem;">Accept Mission</button>` : `<div class="secure-box">${m.requesterAgreed ? `📞 ${m.phone}<br><small>Vanish in 5M</small>` : 'Waiting for Handshake...'}</div>`}` : `
                 <div class="pill">My Mission</div>
                 <div style="font-weight:800; font-size:1.1rem;">${m.hub} ➔ ${m.task}</div>
                 ${m.runnerAgreed && !m.requesterAgreed ? `<div class="secure-box"><b>${m.rName}</b> is ready!<br><button onclick="handleHandshake('${m.id}', 'requester')" class="btn-main" style="margin-top:12px; padding:12px; font-size:0.85rem;">Share Contact</button></div>` : ''}
