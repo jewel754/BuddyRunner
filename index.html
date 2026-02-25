@@ -18,7 +18,22 @@
         .text-logo span { color: var(--primary); }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .container { max-width: 450px; margin: 0 auto; padding: 1.2rem; }
-        header { padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; background: rgba(10, 17, 32, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        /* FIXED MOBILE HEADER */
+        header { 
+            padding: 1rem 1.2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1001; 
+            background: rgba(10, 17, 32, 0.95); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
+        .header-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
         .tab-nav { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 20px; display: flex; position: relative; margin-bottom: 1.5rem; }
         .tab-btn { flex: 1; padding: 12px; text-align: center; font-weight: 800; cursor: pointer; z-index: 2; color: var(--txt-dim); font-size: 0.85rem; }
         .tab-btn.active { color: var(--white); }
@@ -40,7 +55,7 @@
         .toggle-switch { width: 56px; height: 32px; background: rgba(0,0,0,0.15); border-radius: 20px; position: relative; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
         .toggle-circle { width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 4px; transition: 0.3s; }
         .active-toggle .toggle-circle { transform: translateX(24px); }
-        .logout-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 0.7rem; cursor: pointer; }
+        .logout-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; padding: 8px 10px; border-radius: 10px; font-weight: 800; font-size: 0.65rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -62,11 +77,11 @@
 
 <div class="container" id="app-body" style="display:none;">
     <header>
-        <div style="font-weight: 800; font-size: 1.3rem;">Buddy<span>Runner</span></div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <button onclick="enableNotifications()" style="background:none; border:none; font-size:1.1rem; cursor:pointer;">🔔</button>
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLScN2j1rEhMBBlh28jWtbkvazL0zUZQ7y3otBTkROAmkfzQDKA/viewform?usp=publish-editor" target="_blank" style="text-decoration:none; font-size:0.6rem; font-weight:800; color:var(--white); background: var(--info); padding: 6px 10px; border-radius: 10px;">Feedback</a>
-            <div id="u-display" style="font-size:0.6rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 10px; border-radius: 10px;"></div>
+        <div style="font-weight: 800; font-size: 1.1rem; flex-shrink: 1;">Buddy<span>Runner</span></div>
+        <div class="header-group">
+            <button onclick="enableNotifications()" style="background:rgba(255,255,255,0.1); border:none; font-size:1rem; cursor:pointer; padding: 5px; border-radius: 8px;">🔔</button>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScN2j1rEhMBBlh28jWtbkvazL0zUZQ7y3otBTkROAmkfzQDKA/viewform?usp=sf_link" target="_blank" style="text-decoration:none; font-size:0.6rem; font-weight:800; color:var(--white); background: var(--info); padding: 6px 10px; border-radius: 8px; white-space: nowrap;">Feedback</a>
+            <div id="u-display" style="font-size:0.6rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 10px; border-radius: 8px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
             <button onclick="logout()" class="logout-btn">Exit</button>
         </div>
     </header>
@@ -101,13 +116,12 @@
         newData.forEach(m => {
             const oldM = database.find(o => o.id === m.id);
             if (m.phone === currentUserPhone && m.runnerAgreed && (!oldM || !oldM.runnerAgreed)) {
-                // System Alert
                 alert(`MATCH! ${m.rName} has accepted your ${m.task}! 🚀`);
-                // Browser Notification
                 if (Notification.permission === "granted") {
+                    if (navigator.vibrate) navigator.vibrate(200);
                     new Notification("Buddy Found! 🚀", {
                         body: `${m.rName} accepted your request. Tap to open.`,
-                        vibrate: [200, 100, 200]
+                        icon: "https://cdn-icons-png.flaticon.com/512/3114/3114842.png"
                     });
                 }
             }
@@ -130,7 +144,10 @@
             alert("Notifications not supported in this browser.");
         } else {
             Notification.requestPermission().then(p => {
-                if (p === "granted") new Notification("Notifications Active!", {body: "We'll ping you when a match is found."});
+                if (p === "granted") {
+                    if (navigator.vibrate) navigator.vibrate(100);
+                    new Notification("Notifications Active!", {body: "We'll ping you when a match is found."});
+                }
             });
         }
     }
