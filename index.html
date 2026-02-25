@@ -12,32 +12,25 @@
         :root { --primary: #FF8C00; --navy: #0A1120; --card-navy: #161C2D; --white: #FFFFFF; --txt-dim: #94A3B8; --success: #10B981; --danger: #EF4444; }
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Outfit', sans-serif; background: var(--navy); color: var(--white); padding-bottom: 140px; overflow-x: hidden; }
-        
-        /* Motion Logo Screen */
         #registration-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #161C2D 0%, #0A1120 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .reg-card { background: var(--card-navy); padding: 40px 30px; border-radius: 32px; width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .text-logo { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1.5px; animation: float 3s ease-in-out infinite; }
         .text-logo span { color: var(--primary); }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
         .container { max-width: 450px; margin: 0 auto; padding: 1.2rem; }
         header { padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; background: rgba(10, 17, 32, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .tab-nav { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 20px; display: flex; position: relative; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
+        .tab-nav { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 20px; display: flex; position: relative; margin-bottom: 1.5rem; }
         .tab-btn { flex: 1; padding: 12px; text-align: center; font-weight: 800; cursor: pointer; z-index: 2; color: var(--txt-dim); font-size: 0.85rem; }
         .tab-btn.active { color: var(--white); }
-        .glider { position: absolute; height: calc(100% - 10px); width: calc(50% - 5px); background: var(--primary); border-radius: 16px; top: 5px; left: 5px; transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-
+        .glider { position: absolute; height: calc(100% - 10px); width: calc(50% - 5px); background: var(--primary); border-radius: 16px; top: 5px; left: 5px; transition: 0.4s; }
         .glass-card { background: var(--card-navy); padding: 25px; border-radius: 28px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.03); }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--txt-dim); margin: 0 0 8px 5px; letter-spacing: 1px; }
         select, input { width: 100%; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; color: var(--white); margin-bottom: 15px; font-family: inherit; }
         .btn-main { width: 100%; padding: 18px; border: none; border-radius: 20px; background: var(--primary); color: white; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); }
-        
         .mission-card { background: var(--card-navy); padding: 1.5rem; border-radius: 24px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.03); }
         .pill { font-size: 0.65rem; font-weight: 900; padding: 5px 12px; border-radius: 10px; background: rgba(255, 140, 0, 0.15); color: var(--primary); display: inline-block; margin-bottom: 12px; }
         .secure-box { background: rgba(16, 185, 129, 0.05); border: 1px dashed var(--success); padding: 18px; border-radius: 20px; margin-top: 15px; text-align: center; }
-
-        .bottom-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; background: var(--primary); padding: 1.2rem; border-radius: 28px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); z-index: 1000; }
+        .bottom-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; background: var(--primary); padding: 1.2rem; border-radius: 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
         .toggle-switch { width: 56px; height: 32px; background: rgba(0,0,0,0.15); border-radius: 20px; position: relative; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
         .toggle-circle { width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 4px; transition: 0.3s; }
         .active-toggle .toggle-circle { transform: translateX(24px); }
@@ -49,27 +42,15 @@
 <div id="registration-screen">
     <div class="reg-card">
         <div class="text-logo">Buddy<span>Runner</span></div>
-        
-        <p style="font-size: 1rem; color: var(--white); font-weight: 600; margin-bottom: 5px;">
-            Exclusive radar for IMT Hyderabad.
-        </p>
-        <p style="font-size: 0.85rem; color: var(--txt-dim); margin-bottom: 25px;">
-            Hostel life, sorted.
-        </p>
-
+        <p style="font-size: 1rem; color: var(--white); font-weight: 600; margin-bottom: 5px;">Exclusive radar for IMT Hyderabad.</p>
+        <p style="font-size: 0.85rem; color: var(--txt-dim); margin-bottom: 25px;">Hostel life, sorted.</p>
         <div style="text-align: left;">
             <label>Display Name</label>
-            <input type="text" id="u-name" placeholder="e.g. KAKA ROA👺">
-            
-            <label>Mobile Number (Radar ID)</label>
+            <input type="text" id="u-name" placeholder="e.g. Jewel">
+            <label>Mobile Number</label>
             <input type="tel" id="u-phone" maxlength="10" placeholder="10-digit number">
         </div>
-
         <button onclick="saveUser()" class="btn-main">Enter Radar</button>
-        
-        <p style="font-size: 0.6rem; color: var(--txt-dim); margin-top: 15px; opacity: 0.6;">
-            ⚡ Instant access. No OTP required.
-        </p>
     </div>
 </div>
 
@@ -81,56 +62,41 @@
             <button onclick="logout()" class="logout-btn">Exit</button>
         </div>
     </header>
-
-    <div class="tab-nav">
-        <div class="glider" id="glider"></div>
-        <div class="tab-btn active" onclick="setTab('errand', 0)">Errands</div>
-        <div class="tab-btn" onclick="setTab('ride', 100)">Cab Share</div>
-    </div>
-
+    <div class="tab-nav"><div class="glider" id="glider"></div><div class="tab-btn active" onclick="setTab('errand', 0)">Errands</div><div class="tab-btn" onclick="setTab('ride', 100)">Cab Share</div></div>
     <div class="glass-card" id="form-content"></div>
-    <h3 style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.75rem; letter-spacing: 1px;">ACTIVE RADAR</h3>
+    <h3 id="radar-title" style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.75rem; letter-spacing: 1px;">MY ACTIVE REQUESTS</h3>
     <div id="mission-feed"></div>
 </div>
 
 <div class="bottom-bar" id="mode-bar" style="display:none;">
     <div class="mode-info">
         <h4 id="m-status" style="font-size:0.95rem; font-weight:800;">Mode: Requester</h4>
-        <p style="font-size:0.65rem; color:rgba(255,255,255,0.8)">Account Linked via Number</p>
+        <p style="font-size:0.65rem; color:rgba(255,255,255,0.8)">GPS Radar Active</p>
     </div>
-    <div class="toggle-switch" id="role-switch" onclick="toggleRole()">
-        <div class="toggle-circle"></div>
-    </div>
+    <div class="toggle-switch" id="role-switch" onclick="toggleRole()"><div class="toggle-circle"></div></div>
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyA55HET0ef3Iw--y0vLpkK4tMOvyl44jGw",
-        authDomain: "buddyrunner-1f4f4.firebaseapp.com",
-        projectId: "buddyrunner-1f4f4",
-        storageBucket: "buddyrunner-1f4f4.firebasestorage.app",
-        messagingSenderId: "441349525593",
-        appId: "1:441349525593:web:2b4429b55dc756130ae148"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyA55HET0ef3Iw--y0vLpkK4tMOvyl44jGw", authDomain: "buddyrunner-1f4f4.firebaseapp.com", projectId: "buddyrunner-1f4f4", storageBucket: "buddyrunner-1f4f4.firebasestorage.app", messagingSenderId: "441349525593", appId: "1:441349525593:web:2b4429b55dc756130ae148" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
     let currentUser = "", currentUserPhone = "", isRunner = false, currentTab = 'errand', database = [];
 
-    // Auto-Login implementation
     window.onload = () => {
         const storedPhone = localStorage.getItem('buddyRunnerPhone');
         const storedName = localStorage.getItem('buddyRunnerName');
-        if (storedPhone) {
-            currentUserPhone = storedPhone;
-            currentUser = storedName || "Student";
-            showApp();
-        }
+        if (storedPhone) { currentUserPhone = storedPhone; currentUser = storedName || "Student"; showApp(); }
     };
 
     db.collection("missions").onSnapshot((snapshot) => {
-        database = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        newData.forEach(m => {
+            const oldM = database.find(o => o.id === m.id);
+            if (m.phone === currentUserPhone && m.runnerAgreed && (!oldM || !oldM.runnerAgreed)) {
+                alert(`WOW! Match Found: ${m.rName} is bringing your ${m.task}! 🚀`);
+            }
+        });
+        database = newData;
         processVanishLogic();
         render();
     });
@@ -146,21 +112,13 @@
     function saveUser() {
         const name = document.getElementById('u-name').value.trim();
         const phone = document.getElementById('u-phone').value.trim();
-        if(!name || phone.length !== 10) return alert("Valid name and 10-digit number required.");
-        
-        currentUser = name;
-        currentUserPhone = phone;
-        localStorage.setItem('buddyRunnerPhone', phone);
-        localStorage.setItem('buddyRunnerName', name);
+        if(!name || phone.length !== 10) return alert("Valid Name & 10-digit number required.");
+        currentUser = name; currentUserPhone = phone;
+        localStorage.setItem('buddyRunnerPhone', phone); localStorage.setItem('buddyRunnerName', name);
         showApp();
     }
 
-    function logout() {
-        if(confirm("Logout from Radar?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
+    function logout() { if(confirm("Exit Radar?")) { localStorage.clear(); location.reload(); } }
 
     function showApp() {
         document.getElementById('registration-screen').style.display = 'none';
@@ -170,45 +128,45 @@
         render();
     }
 
-    function setTab(t, offset) {
-        currentTab = t;
-        document.getElementById('glider').style.transform = `translateX(${offset}%)`;
-        render();
-    }
+    function setTab(t, offset) { currentTab = t; document.getElementById('glider').style.transform = `translateX(${offset}%)`; render(); }
 
     function toggleRole() {
         isRunner = !isRunner;
         document.getElementById('role-switch').classList.toggle('active-toggle');
-        document.getElementById('m-status').innerText = isRunner ? "Mode: Helper" : "Mode: Requester";
+        document.getElementById('m-status').innerText = isRunner ? "Mode: Going Out" : "Mode: Requester";
+        document.getElementById('radar-title').innerText = isRunner ? "ACTIVE CAMPUS RADAR" : "MY ACTIVE REQUESTS";
         render();
     }
 
     function postMission() {
         const task = document.getElementById('f-task')?.value || (currentTab === 'ride' ? "Cab Share" : "");
-        if(!task) return alert("Task name is required.");
+        if(!task) return alert("Task details are mandatory.");
         const mins = parseInt(document.getElementById('f-timer')?.value) || 30;
-        
         db.collection("missions").add({
-            type: currentTab, 
-            hub: document.getElementById('f-hub')?.value || document.getElementById('f-airport')?.value,
-            task, 
-            pay: document.getElementById('f-pay')?.value || "Split",
-            expiryTime: Date.now() + (mins * 60 * 1000),
-            timeLabel: mins + "M duration",
+            type: currentTab, hub: document.getElementById('f-hub')?.value || document.getElementById('f-airport')?.value,
+            task, pay: document.getElementById('f-pay')?.value || "Split",
+            expiryTime: Date.now() + (mins * 60 * 1000), timeLabel: mins + "M duration",
             user: currentUser, phone: currentUserPhone,
-            runnerAgreed: false, requesterAgreed: false, rName: "", rPhone: "",
-            connectedAt: null
-        });
-        alert("Mission Live on Radar!");
+            runnerAgreed: false, rName: "", rPhone: "", connectedAt: null, lat: null, lng: null
+        }).then(() => alert("Mission live on campus radar!"));
     }
 
-    function handleHandshake(id, role) {
-        const missionRef = db.collection("missions").doc(id);
-        if(role === 'runner') {
-            missionRef.update({ runnerAgreed: true, rName: currentUser, rPhone: currentUserPhone });
-        } else {
-            missionRef.update({ requesterAgreed: true, connectedAt: Date.now() });
+    function startTracking(id) {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition((pos) => {
+                db.collection("missions").doc(id).update({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            }, (err) => console.log("GPS Blocked"), { enableHighAccuracy: true });
         }
+    }
+
+    function handleHandshake(id) {
+        // Direct Match Logic - No secondary acceptance needed
+        db.collection("missions").doc(id).update({ 
+            runnerAgreed: true, 
+            rName: currentUser, 
+            rPhone: currentUserPhone,
+            connectedAt: Date.now() 
+        }).then(() => startTracking(id));
     }
 
     function render() {
@@ -217,42 +175,46 @@
             <label>Hub Location</label><select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option></select>
             <input type="text" id="f-task" placeholder="e.g. Amazon Pickup">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                <div><label>Duration</label><select id="f-timer"><option value="15">15M</option><option value="30">30M</option><option value="60">1H</option></select></div>
+                <div><label>Duration</label><select id="f-timer"><option value="30">30M</option><option value="60">1H</option></select></div>
                 <div><label>Bounty (₹)</label><input type="number" id="f-pay" placeholder="30"></div>
             </div>
             <button onclick="postMission()" class="btn-main">Broadcast Errand</button>` : `
-            <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad Stn</option></select>
+            <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad</option></select>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
                 <div><label>Duration</label><select id="f-timer"><option value="60">1H</option><option value="120">2H</option></select></div>
-                <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="e.g. Pillar 12"></div>
+                <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="Pillar #"></div>
             </div>
-            <button onclick="postMission()" class="btn-main">Find Cab Buddy</button>`;
+            <button onclick="postMission()" class="btn-main">Find Ride Partner</button>`;
 
         const feed = document.getElementById('mission-feed');
         feed.innerHTML = '';
         
-    const filtered = database.filter(m => m.type === currentTab && m.phone !== currentUserPhone);        
-        if(filtered.length === 0) {
-            feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar is clear. Be the first to post!</div>`;
-        }
+        const filtered = database.filter(m => m.type === currentTab && (isRunner ? m.phone !== currentUserPhone : m.phone === currentUserPhone));
+        
+        if(filtered.length === 0) feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar is clear.</div>`;
 
         filtered.forEach(m => {
-            const card = document.createElement('div');
-            card.className = 'mission-card';
-            const connected = m.runnerAgreed && m.requesterAgreed;
+            const card = document.createElement('div'); card.className = 'mission-card';
             card.innerHTML = isRunner ? `
                 <div class="pill">${m.hub}</div>
-                <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between;"><span>${m.task}</span><span style="color:var(--primary)">₹${m.pay}</span></div>
-                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:10px;">👤 ${m.user} | ⏳ ${m.timeLabel}</div>
-                ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}', 'runner')" class="btn-main" style="margin-top:15px; padding:12px; font-size:0.85rem;">Accept Mission</button>` : `<div class="secure-box">${m.requesterAgreed ? `📞 ${m.phone}<br><small>Vanish in 5M</small>` : 'Waiting for Handshake...'}</div>`}` : `
-                <div class="pill">My Mission</div>
+                <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between;"><span>${m.task}</span><span>₹${m.pay}</span></div>
+                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px;">👤 ${m.user}</div>
+                ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}')" class="btn-main" style="margin-top:15px; padding:12px;">Help this Buddy</button>` : 
+                `<div class="secure-box">Connected!<br>📞 ${m.phone}</div>`}` : `
+                <div class="pill">My Active Post</div>
                 <div style="font-weight:800; font-size:1.1rem;">${m.hub} ➔ ${m.task}</div>
-                ${m.runnerAgreed && !m.requesterAgreed ? `<div class="secure-box"><b>${m.rName}</b> is ready!<br><button onclick="handleHandshake('${m.id}', 'requester')" class="btn-main" style="margin-top:12px; padding:12px; font-size:0.85rem;">Share Contact</button></div>` : ''}
-                ${connected ? `<div class="secure-box">Connected!<br>📞 ${m.rPhone}<br><small>Vanishing in 5M</small></div>` : ''}`;
+                
+                ${m.lat ? `
+                <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid var(--success);">
+                    <div style="font-size:0.6rem; color:var(--success); font-weight:800;">🛰️ BUDDY TRACKING ACTIVE</div>
+                    <a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" style="display:block; text-decoration:none; color:var(--white); font-size:0.75rem; margin-top:5px; font-weight:600;">📍 Click to see Buddy on Map</a>
+                </div>` : ''}
+
+                ${m.runnerAgreed ? `<div class="secure-box"><b>${m.rName}</b> is on the way!<br>📞 ${m.rPhone}<br><small>Task finishes in 5M</small></div>` : 
+                `<div style="font-size:0.7rem; color:var(--txt-dim); margin-top:10px; text-align:center;">📡 Waiting for a buddy runner...</div>`}`;
             feed.appendChild(card);
         });
     }
 </script>
 </body>
 </html>
-
