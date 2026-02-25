@@ -231,8 +231,7 @@
         const feed = document.getElementById('mission-feed');
         feed.innerHTML = '';
         
-        const filtered = database.filter(m => m.type === currentTab && (isRunner ? m.phone !== currentUserPhone : m.phone === currentUserPhone));
-        
+    const filtered = database.filter(m => m.type === currentTab && m.phone !== currentUserPhone);        
         if(filtered.length === 0) {
             feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar is clear. Be the first to post!</div>`;
         }
@@ -256,3 +255,4 @@
 </script>
 </body>
 </html>
+
