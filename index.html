@@ -44,6 +44,16 @@
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--txt-dim); margin: 0 0 8px 5px; letter-spacing: 1px; }
         select, input { width: 100%; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; color: var(--white); margin-bottom: 15px; font-family: inherit; }
         
+        .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .cat-item { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px 5px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+        .cat-item:active { background: rgba(255, 140, 0, 0.1); border-color: var(--primary); }
+        .cat-icon { font-size: 1.5rem; margin-bottom: 5px; display: block; }
+        .cat-label { font-size: 0.6rem; font-weight: 600; color: var(--txt-dim); }
+
+        .bounty-row { display: flex; gap: 8px; margin-bottom: 15px; }
+        .bounty-chip { flex: 1; padding: 12px; border-radius: 15px; background: none; border: 1px solid var(--primary); color: var(--white); font-weight: 800; font-size: 0.8rem; cursor: pointer; }
+        .bounty-chip:focus { background: var(--primary); }
+
         .btn-main { width: 100%; padding: 18px; border: none; border-radius: 20px; background: var(--primary); color: white; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); }
         .btn-success { background: var(--success); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); width: 100%; color: white;}
         .btn-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
@@ -69,10 +79,9 @@
     <div class="reg-card">
         <div class="text-logo">Buddy<span>Runner</span></div>
         <p style="font-size: 1rem; color: var(--white); font-weight: 600; margin-bottom: 5px;">Exclusive radar for IMT Hyderabad.</p>
-        <p style="font-size: 0.85rem; color: var(--txt-dim); margin-bottom: 25px;">Hostel life, sorted.</p>
         <div style="text-align: left;">
             <label>Display Name</label>
-            <input type="text" id="u-name" placeholder="e.g. KAKA RAO👺">
+            <input type="text" id="u-name" placeholder="e.g. Jewel">
             <label>Mobile Number</label>
             <input type="tel" id="u-phone" maxlength="10" placeholder="10-digit number">
         </div>
@@ -84,7 +93,7 @@
     <header>
         <div style="font-weight: 800; font-size: 1.1rem; flex-shrink: 1;">Buddy<span>Runner</span></div>
         <div class="header-group">
-            <button onclick="enableNotifications()" style="background:rgba(255,255,255,0.1); border:none; font-size:1rem; cursor:pointer; padding: 5px; border-radius: 8px;">🔔</button>
+            <button onclick="enableNotifications()" style="background:none; border:none; font-size:1.1rem; cursor:pointer; padding: 5px; border-radius: 8px;">🔔</button>
             <a href="https://docs.google.com/forms/d/e/1FAIpQLScN2j1rEhMBBlh28jWtbkvazL0zUZQ7y3otBTkROAmkfzQDKA/viewform?usp=sf_link" target="_blank" style="text-decoration:none; font-size:0.6rem; font-weight:800; color:var(--white); background: var(--info); padding: 6px 10px; border-radius: 8px; white-space: nowrap;">Feedback</a>
             <div id="u-display" style="font-size:0.6rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 10px; border-radius: 8px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
             <button onclick="logout()" class="logout-btn">Exit</button>
@@ -92,7 +101,7 @@
     </header>
     <div class="tab-nav"><div class="glider" id="glider"></div><div class="tab-btn active" onclick="setTab('errand', 0)">Errands</div><div class="tab-btn" onclick="setTab('ride', 100)">Cab Share</div></div>
     <div class="glass-card" id="form-content"></div>
-    <h3 id="radar-title" style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.75rem; letter-spacing: 1px;">MY ACTIVE REQUESTS</h3>
+    <h3 id="radar-title" style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.75rem; letter-spacing: 1px;">ACTIVE REQUESTS</h3>
     <div id="mission-feed"></div>
 </div>
 
@@ -124,10 +133,7 @@
                 alert(`MATCH! ${m.rName} has accepted your ${m.task}! 🚀`);
                 if (Notification.permission === "granted") {
                     if (navigator.vibrate) navigator.vibrate(200);
-                    new Notification("Buddy Found! 🚀", {
-                        body: `${m.rName} accepted your request.`,
-                        icon: "https://cdn-icons-png.flaticon.com/512/3114/3114842.png"
-                    });
+                    new Notification("Buddy Found! 🚀", { body: `${m.rName} accepted your request.` });
                 }
             }
         });
@@ -140,18 +146,12 @@
         const now = Date.now();
         database.forEach(m => {
             if (m.expiryTime && now > m.expiryTime) { db.collection("missions").doc(m.id).delete(); }
-            if (m.connectedAt && now > (m.connectedAt + (30 * 60 * 1000))) { db.collection("missions").doc(m.id).delete(); }
+            if (m.connectedAt && now > (m.connectedAt + (45 * 60 * 1000))) { db.collection("missions").doc(m.id).delete(); }
         });
     }
 
     function enableNotifications() {
-        if (!("Notification" in window)) {
-            alert("Notifications not supported.");
-        } else {
-            Notification.requestPermission().then(p => {
-                if (p === "granted") new Notification("Notifications Active!");
-            });
-        }
+        if ("Notification" in window) Notification.requestPermission();
     }
 
     function saveUser() {
@@ -163,9 +163,17 @@
         showApp();
     }
 
+    function quickFill(task, hub) {
+        if(document.getElementById('f-task')) document.getElementById('f-task').value = task;
+        if(document.getElementById('f-hub')) document.getElementById('f-hub').value = hub;
+    }
+
+    function setBounty(val) {
+        if(document.getElementById('f-pay')) document.getElementById('f-pay').value = val;
+    }
+
     function removeMission(id, type) {
-        const msg = type === 'complete' ? "Mark task as completed?" : "Delete this request?";
-        if(confirm(msg)) db.collection("missions").doc(id).delete();
+        if(confirm("Confirm action?")) db.collection("missions").doc(id).delete();
     }
 
     function logout() { if(confirm("Exit Radar?")) { localStorage.clear(); location.reload(); } }
@@ -184,13 +192,12 @@
         isRunner = !isRunner;
         document.getElementById('role-switch').classList.toggle('active-toggle');
         document.getElementById('m-status').innerText = isRunner ? "Mode: Going Out" : "Mode: Requester";
-        document.getElementById('radar-title').innerText = isRunner ? "ACTIVE CAMPUS RADAR" : "MY ACTIVE REQUESTS";
         render();
     }
 
     function postMission() {
         const task = document.getElementById('f-task')?.value || (currentTab === 'ride' ? "Cab Share" : "");
-        if(!task) return alert("Task details are mandatory.");
+        if(!task) return alert("Task details required.");
         const mins = parseInt(document.getElementById('f-timer')?.value) || 30;
         db.collection("missions").add({
             type: currentTab, hub: document.getElementById('f-hub')?.value || document.getElementById('f-airport')?.value,
@@ -205,41 +212,72 @@
         if ("geolocation" in navigator) {
             navigator.geolocation.watchPosition((pos) => {
                 db.collection("missions").doc(id).update({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-            }, (err) => console.log("GPS Blocked"), { enableHighAccuracy: true });
+            }, (err) => console.log(err), { enableHighAccuracy: true });
         }
     }
 
     function handleHandshake(id) {
         db.collection("missions").doc(id).update({ 
-            runnerAgreed: true, 
-            rName: currentUser, 
-            rPhone: currentUserPhone,
-            connectedAt: Date.now() 
+            runnerAgreed: true, rName: currentUser, rPhone: currentUserPhone, connectedAt: Date.now() 
         }).then(() => startTracking(id));
     }
 
     function render() {
         const form = document.getElementById('form-content');
-        form.innerHTML = currentTab === 'errand' ? `
-            <label>Hub Location</label><select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option></select>
-            <input type="text" id="f-task" placeholder="e.g. Amazon Pickup">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                <div><label>Vanish in</label><select id="f-timer"><option value="30">30M</option><option value="60">1H</option><option value="120">2H</option></select></div>
-                <div><label>Bounty (₹)</label><input type="number" id="f-pay" placeholder="30"></div>
-            </div>
-            <button onclick="postMission()" class="btn-main">Broadcast Errand</button>` : `
-            <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad</option></select>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                <div><label>Vanish in</label><select id="f-timer"><option value="60">1H</option><option value="120">2H</option></select></div>
-                <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="Pillar #"></div>
-            </div>
-            <button onclick="postMission()" class="btn-main">Find Ride Partner</button>`;
+        const timerSelect = `<select id="f-timer"><option value="15">15M</option><option value="30" selected>30M</option><option value="60">1H</option><option value="120">2H</option><option value="240">4H</option></select>`;
+        
+        if (currentTab === 'errand') {
+            form.innerHTML = `
+                <label>Quick Categories</label>
+                <div class="category-grid">
+                    <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')">
+                        <span class="cat-icon">📦</span><span class="cat-label">Parcel</span>
+                    </div>
+                    <div class="cat-item" onclick="quickFill('🍔 Burger/Food', '🏛️ Adda')">
+                        <span class="cat-icon">🍔</span><span class="cat-label">Burger</span>
+                    </div>
+                    <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')">
+                        <span class="cat-icon">🚬</span><span class="cat-label">Sutta</span>
+                    </div>
+                </div>
+                <label>Hub Location</label>
+                <select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option><option>✈️ Shamshabad</option></select>
+                <label>Task Description</label>
+                <input type="text" id="f-task" placeholder="Or type custom task...">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
+                    <div><label>Vanish in</label>${timerSelect}</div>
+                    <div>
+                        <label>Bounty (₹)</label>
+                        <div class="bounty-row">
+                            <button class="bounty-chip" onclick="setBounty(20)">₹20</button>
+                            <button class="bounty-chip" onclick="setBounty(50)">₹50</button>
+                        </div>
+                        <input type="number" id="f-pay" placeholder="Custom">
+                    </div>
+                </div>
+                <button onclick="postMission()" class="btn-main">Broadcast Errand</button>`;
+        } else {
+            form.innerHTML = `
+                <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad</option><option>✈️ Shamshabad</option><option>🏛️ Adda</option></select>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
+                    <div><label>Vanish in</label>${timerSelect}</div>
+                    <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="Pillar #"></div>
+                </div>
+                <button onclick="postMission()" class="btn-main">Find Partner</button>`;
+        }
 
         const feed = document.getElementById('mission-feed');
         feed.innerHTML = '';
-        const filtered = database.filter(m => m.type === currentTab && (isRunner ? m.phone !== currentUserPhone : m.phone === currentUserPhone));
+        const filtered = database.filter(m => {
+            const isMyTask = m.phone === currentUserPhone;
+            const amIMatchedRunner = m.rPhone === currentUserPhone;
+            const isTabMatch = m.type === currentTab;
+            if (!isTabMatch) return false;
+            if (isRunner) return !isMyTask && (!m.runnerAgreed || amIMatchedRunner);
+            else return isMyTask;
+        });
         
-        if(filtered.length === 0) feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar is clear.</div>`;
+        if(filtered.length === 0) feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar Clear.</div>`;
 
         filtered.forEach(m => {
             const card = document.createElement('div'); card.className = 'mission-card';
@@ -247,23 +285,23 @@
                 card.innerHTML = `
                 <div class="pill">${m.hub}</div>
                 <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between;"><span>${m.task}</span><span>₹${m.pay}</span></div>
-                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px;">👤 ${m.user}</div>
+                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px;">👤 Requester: ${m.user}</div>
                 ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}')" class="btn-main" style="margin-top:15px; padding:12px;">Help Buddy</button>` : 
-                `<div class="btn-action-row"><a href="https://wa.me/91${m.phone}" class="btn-small btn-chat">WhatsApp</a><div class="secure-box" style="margin-top:0; padding:12px;">Matched!</div></div>`}`;
+                `<div class="btn-action-row"><a href="https://wa.me/91${m.phone}" class="btn-small btn-chat">WhatsApp ${m.user}</a><div class="secure-box" style="margin-top:0; padding:12px;">Matched!</div></div>`}`;
             } else {
                 card.innerHTML = `
-                <div class="pill">My Active Post</div>
+                <div class="pill">My Request</div>
                 <div style="font-weight:800; font-size:1.1rem;">${m.hub} ➔ ${m.task}</div>
+                ${m.lat ? `<div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid var(--success);"><div style="font-size:0.6rem; color:var(--success); font-weight:800;">🛰️ TRACKING ACTIVE</div><a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" style="display:block; color:white; font-size:0.75rem; margin-top:5px; font-weight:600;">📍 Click to Track Runner on Map</a></div>` : ''}
                 ${m.runnerAgreed ? `
                 <div class="secure-box">
-                    <b>${m.rName}</b> is helping!<br>
-                    ${m.lat ? `<a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" class="btn-small btn-track">📍 Track Buddy on Map</a>` : '<div style="font-size:0.65rem; color:var(--txt-dim); margin:10px 0;">Waiting for GPS signal...</div>'}
+                    <p style="font-size:0.85rem; margin-bottom:10px;"><b>${m.rName}</b> is on the way!</p>
                     <div class="btn-action-row">
-                        <a href="https://wa.me/91${m.rPhone}" class="btn-small btn-chat">Chat</a>
-                        <button onclick="removeMission('${m.id}', 'complete')" class="btn-small btn-success">Completed</button>
+                        <a href="https://wa.me/91${m.rPhone}" class="btn-small btn-chat">Chat Runner</a>
+                        <button onclick="removeMission('${m.id}', 'complete')" class="btn-small btn-success">Done</button>
                     </div>
                 </div>` : 
-                `<button onclick="removeMission('${m.id}', 'cancel')" class="btn-small btn-cancel" style="margin-top:10px;">Cancel (Mistake)</button>`}
+                `<button onclick="removeMission('${m.id}', 'cancel')" class="btn-small btn-cancel" style="margin-top:10px;">Cancel Request</button>`}
                 `;
             }
             feed.appendChild(card);
