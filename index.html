@@ -9,46 +9,40 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        :root { --primary: #FF8C00; --navy: #0A1120; --card-navy: #161C2D; --white: #FFFFFF; --txt-dim: #94A3B8; --success: #10B981; --danger: #EF4444; --info: #3B82F6; }
+        :root { --primary: #FF8C00; --navy: #0A1120; --card-navy: rgba(22, 28, 45, 0.9); --white: #FFFFFF; --txt-dim: #94A3B8; --success: #10B981; --danger: #EF4444; --info: #3B82F6; }
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Outfit', sans-serif; background: var(--navy); color: var(--white); padding-bottom: 140px; overflow-x: hidden; }
+        
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: linear-gradient(rgba(10, 17, 32, 0.85), rgba(10, 17, 32, 0.85)), url('https://images.unsplash.com/photo-1523050335392-93851179ae22?auto=format&fit=crop&w=1000&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            color: var(--white); padding-bottom: 140px; overflow-x: hidden; 
+        }
         
         #registration-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #161C2D 0%, #0A1120 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .reg-card { background: var(--card-navy); padding: 40px 30px; border-radius: 32px; width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        .text-logo { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1.5px; animation: float 3s ease-in-out infinite; }
+        .reg-card { background: var(--card-navy); padding: 40px 30px; border-radius: 32px; width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+        
+        .text-logo { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1.5px; color: var(--white); animation: float 3s ease-in-out infinite; }
         .text-logo span { color: var(--primary); }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         .container { max-width: 450px; margin: 0 auto; padding: 1.2rem; }
-        
-        header { 
-            padding: 1rem 1.2rem; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: sticky; 
-            top: 0; 
-            z-index: 1001; 
-            background: rgba(10, 17, 32, 0.95); 
-            backdrop-filter: blur(12px); 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-        }
+        header { padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001; background: rgba(10, 17, 32, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .header-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-        .tab-nav { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 20px; display: flex; position: relative; margin-bottom: 1.5rem; }
+        .tab-nav { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 20px; display: flex; position: relative; margin-bottom: 1.5rem; backdrop-filter: blur(5px); }
         .tab-btn { flex: 1; padding: 12px; text-align: center; font-weight: 800; cursor: pointer; z-index: 2; color: var(--txt-dim); font-size: 0.85rem; }
         .tab-btn.active { color: var(--white); }
         .glider { position: absolute; height: calc(100% - 10px); width: calc(50% - 5px); background: var(--primary); border-radius: 16px; top: 5px; left: 5px; transition: 0.4s; }
         
-        .glass-card { background: var(--card-navy); padding: 25px; border-radius: 28px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.03); }
+        .glass-card { background: var(--card-navy); padding: 25px; border-radius: 28px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.03); backdrop-filter: blur(10px); }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--txt-dim); margin: 0 0 8px 5px; letter-spacing: 1px; }
         select, input { width: 100%; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; color: var(--white); margin-bottom: 15px; font-family: inherit; }
         
         .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .cat-item { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px 5px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .cat-item:active { background: rgba(255, 140, 0, 0.1); border-color: var(--primary); }
-        .cat-icon { font-size: 1.5rem; margin-bottom: 5px; display: block; }
-        .cat-label { font-size: 0.6rem; font-weight: 600; color: var(--txt-dim); }
 
         .bounty-row { display: flex; gap: 8px; margin-bottom: 15px; }
         .bounty-chip { flex: 1; padding: 12px; border-radius: 15px; background: none; border: 1px solid var(--primary); color: var(--white); font-weight: 800; font-size: 0.8rem; cursor: pointer; }
@@ -59,21 +53,41 @@
         .btn-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .btn-small { padding: 12px; border-radius: 15px; border: none; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
         .btn-cancel { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); width: 100%; }
-        .btn-chat { background: #25D366; color: white; }
-        .btn-track { background: var(--info); color: white; width: 100%; margin-top: 10px; }
+        .btn-chat { background: var(--info); color: white; }
 
-        .mission-card { background: var(--card-navy); padding: 1.5rem; border-radius: 24px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.03); }
+        .mission-card { background: var(--card-navy); padding: 1.5rem; border-radius: 24px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.03); backdrop-filter: blur(10px); }
         .pill { font-size: 0.65rem; font-weight: 900; padding: 5px 12px; border-radius: 10px; background: rgba(255, 140, 0, 0.15); color: var(--primary); display: inline-block; margin-bottom: 12px; }
         .secure-box { background: rgba(16, 185, 129, 0.05); border: 1px dashed var(--success); padding: 18px; border-radius: 20px; margin-top: 15px; text-align: center; }
         
-        .bottom-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; background: var(--primary); padding: 1.2rem; border-radius: 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .bottom-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; background: var(--primary); padding: 1.2rem; border-radius: 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .toggle-switch { width: 56px; height: 32px; background: rgba(0,0,0,0.15); border-radius: 20px; position: relative; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
         .toggle-circle { width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 4px; transition: 0.3s; }
         .active-toggle .toggle-circle { transform: translateX(24px); }
         .logout-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; padding: 8px 10px; border-radius: 10px; font-weight: 800; font-size: 0.65rem; cursor: pointer; }
+
+        #chat-overlay { position: fixed; inset: 0; background: var(--navy); z-index: 2005; display: none; flex-direction: column; height: 100vh; }
+        .chat-header { padding: 1.2rem; background: var(--card-navy); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 12px; background-size: cover; background-position: center; transition: 0.4s ease-in-out; }
+        .msg { padding: 10px 15px; border-radius: 18px; max-width: 80%; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; }
+        .msg-me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .msg-them { align-self: flex-start; background: var(--card-navy); color: var(--white); border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .chat-input-box { padding: 1rem; background: var(--card-navy); border-top: 1px solid rgba(255,255,255,0.05); }
+        #chat-input { flex: 1; padding: 12px 18px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 25px; color: white; margin-bottom: 0; }
+        .chat-send { background: var(--primary); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        #platform-notification { position: fixed; top: -100px; left: 5%; width: 90%; background: var(--card-navy); border: 1px solid var(--primary); border-radius: 20px; padding: 15px; z-index: 3000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #platform-notification.show { top: 20px; }
     </style>
 </head>
 <body>
+
+<div id="platform-notification" onclick="this.classList.remove('show')">
+    <div style="background:var(--primary); width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">💬</div>
+    <div>
+        <div style="font-weight: 800; font-size: 0.7rem; color: var(--primary);">NEW MESSAGE</div>
+        <div id="notif-text" style="font-size: 0.85rem; color: white;">...</div>
+    </div>
+</div>
 
 <div id="registration-screen">
     <div class="reg-card">
@@ -92,7 +106,7 @@
 
 <div class="container" id="app-body" style="display:none;">
     <header>
-        <div style="font-weight: 800; font-size: 1.1rem; flex-shrink: 1;">Buddy<span>Runner</span></div>
+        <div style="font-weight: 800; font-size: 1.1rem; flex-shrink: 1;" class="text-logo">Buddy<span>Runner</span></div>
         <div class="header-group">
             <button onclick="enableNotifications()" style="background:none; border:none; font-size:1.1rem; cursor:pointer; padding: 5px; border-radius: 8px;">🔔</button>
             <a href="https://docs.google.com/forms/d/e/1FAIpQLScN2j1rEhMBBlh28jWtbkvazL0zUZQ7y3otBTkROAmkfzQDKA/viewform?usp=sf_link" target="_blank" style="text-decoration:none; font-size:0.6rem; font-weight:800; color:var(--white); background: var(--info); padding: 6px 10px; border-radius: 8px; white-space: nowrap;">Feedback</a>
@@ -104,6 +118,32 @@
     <div class="glass-card" id="form-content"></div>
     <h3 id="radar-title" style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.75rem; letter-spacing: 1px;">ACTIVE REQUESTS</h3>
     <div id="mission-feed"></div>
+</div>
+
+<div id="chat-overlay">
+    <div class="chat-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 8px; height: 8px; background: var(--success); border-radius: 50%;"></div>
+            <div style="font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px;">BuddyChat</div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <a id="call-btn" href="tel:" style="text-decoration:none; font-size:1.2rem;">📞</a>
+            <button onclick="syncWallpaper()" style="background:var(--info); border:none; color:white; padding: 5px 10px; border-radius: 10px; font-size: 0.6rem; font-weight: 800;">WALLPAPER 🎨</button>
+            <button onclick="sendNudge()" style="background:rgba(255,140,0,0.1); border:none; color:var(--primary); font-weight:800; padding: 5px 10px; border-radius: 10px; font-size: 0.65rem;">NUDGE 🛎️</button>
+            <button onclick="closeChat()" style="background:none; border:none; color:var(--danger); font-weight:800; cursor:pointer; font-size: 0.9rem;">Exit</button>
+        </div>
+    </div>
+    <div id="chat-messages"></div>
+    <div class="chat-input-box">
+        <div class="sticker-row" style="display:flex; gap:8px; overflow-x:auto; margin-bottom:10px;">
+            <div class="sticker" style="background:rgba(255,255,255,0.05); padding:8px; border-radius:10px; font-size:0.7rem; cursor:pointer;" onclick="sendMessage('Abbey Jaldi Aa! 🐢')">Jaldi Aa 🐢</div>
+            <div class="sticker" style="background:rgba(255,255,255,0.05); padding:8px; border-radius:10px; font-size:0.7rem; cursor:pointer;" onclick="sendMessage('Oye! Kahan reh gaya? 👺')">Kahan h? 👺</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+            <button class="chat-send" onclick="sendMessage()">➔</button>
+        </div>
+    </div>
 </div>
 
 <div class="bottom-bar" id="mode-bar" style="display:none;">
@@ -120,28 +160,39 @@
     const db = firebase.firestore();
     
     let currentUser = "", currentUserPhone = "", isRunner = false, currentTab = 'errand', database = [];
-    let handledMatches = new Set(); 
+    let handledMatches = new Set();
+    let currentChatId = null;
+    let chatListener = null;
+    
+    const wallpapers = [
+        'none',
+        'url("https://images.unsplash.com/photo-1541450805268-4822a3a774ca?q=80&w=1000")', // Lo-fi Night
+        'url("https://images.unsplash.com/photo-1534030347209-467a5b0ad3e6?q=80&w=1000")', // Digital Library
+        'url("https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000")'  // Cyber Hostel
+    ];
 
     window.onload = () => {
         const storedPhone = localStorage.getItem('buddyRunnerPhone');
         const storedName = localStorage.getItem('buddyRunnerName');
-        if (storedPhone) { 
-            currentUserPhone = storedPhone; 
-            currentUser = storedName || "Student"; 
-            showApp(); 
-        }
+        if (storedPhone) { currentUserPhone = storedPhone; currentUser = storedName || "KAKA RAO👺"; showApp(); }
     };
 
     db.collection("missions").onSnapshot((snapshot) => {
         const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         newData.forEach(m => {
-            // Logic to prevent repeated MATCH alerts
             if (m.phone === currentUserPhone && m.runnerAgreed && !handledMatches.has(m.id)) {
                 handledMatches.add(m.id);
-                alert(`MATCH! ${m.rName} has accepted your ${m.task}! 🚀`);
+                alert(`MATCH! ${m.rName} accepted! 🚀`);
                 if (Notification.permission === "granted") {
                     if (navigator.vibrate) navigator.vibrate(200);
-                    new Notification("Buddy Found! 🚀", { body: `${m.rName} accepted your request.` });
+                    new Notification("Buddy Found!", { body: `${m.rName} is helping you.` });
+                }
+            }
+            if ((m.phone === currentUserPhone || m.rPhone === currentUserPhone) && m.runnerAgreed) {
+                setupNotifListener(m.id);
+                // SYNC WALLPAPER FOR BOTH
+                if (m.id === currentChatId) {
+                    document.getElementById('chat-messages').style.backgroundImage = wallpapers[m.wallpaper || 0];
                 }
             }
         });
@@ -149,6 +200,21 @@
         processVanishLogic();
         render();
     });
+
+    function setupNotifListener(mid) {
+        db.collection("missions").doc(mid).collection("chat").orderBy("time", "desc").limit(1).onSnapshot(s => {
+            if(!s.empty) {
+                const msg = s.docs[0].data();
+                if(msg.phone !== currentUserPhone && mid !== currentChatId) {
+                    const bar = document.getElementById('platform-notification');
+                    document.getElementById('notif-text').innerText = msg.text;
+                    bar.classList.add('show');
+                    if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    setTimeout(() => bar.classList.remove('show'), 4000);
+                }
+            }
+        });
+    }
 
     function processVanishLogic() {
         const now = Date.now();
@@ -158,14 +224,12 @@
         });
     }
 
-    function enableNotifications() {
-        if ("Notification" in window) Notification.requestPermission();
-    }
+    function enableNotifications() { if ("Notification" in window) Notification.requestPermission(); }
 
     function saveUser() {
-        const name = document.getElementById('u-name').value.trim();
+        const name = document.getElementById('u-name').value.trim() || "KAKA RAO👺";
         const phone = document.getElementById('u-phone').value.trim();
-        if(!name || phone.length !== 10) return alert("Valid Name & 10-digit number required.");
+        if(phone.length !== 10) return alert("10-digit number required.");
         currentUser = name; currentUserPhone = phone;
         localStorage.setItem('buddyRunnerPhone', phone); localStorage.setItem('buddyRunnerName', name);
         showApp();
@@ -176,13 +240,9 @@
         if(document.getElementById('f-hub')) document.getElementById('f-hub').value = hub;
     }
 
-    function setBounty(val) {
-        if(document.getElementById('f-pay')) document.getElementById('f-pay').value = val;
-    }
+    function setBounty(val) { if(document.getElementById('f-pay')) document.getElementById('f-pay').value = val; }
 
-    function removeMission(id) {
-        if(confirm("Confirm action?")) db.collection("missions").doc(id).delete();
-    }
+    function removeMission(id) { if(confirm("Confirm action?")) db.collection("missions").doc(id).delete(); }
 
     function logout() { if(confirm("Exit?")) { localStorage.clear(); location.reload(); } }
 
@@ -200,21 +260,30 @@
         isRunner = !isRunner;
         document.getElementById('role-switch').classList.toggle('active-toggle');
         document.getElementById('m-status').innerText = isRunner ? "Mode: Going Out" : "Mode: Requester";
-        document.getElementById('radar-title').innerText = isRunner ? "ACTIVE CAMPUS RADAR" : "MY ACTIVE REQUESTS";
         render();
+    }
+
+    function syncWallpaper() {
+        if(!currentChatId) return;
+        const currentM = database.find(m => m.id === currentChatId);
+        const nextWall = ((currentM.wallpaper || 0) + 1) % wallpapers.length;
+        db.collection("missions").doc(currentChatId).update({ wallpaper: nextWall });
+        sendMessage("🎨 Sync: Changed chat theme!");
     }
 
     function postMission() {
         const task = document.getElementById('f-task')?.value || (currentTab === 'ride' ? "Cab Share" : "");
-        if(!task) return alert("Task details required.");
-        const mins = parseInt(document.getElementById('f-timer')?.value) || 30;
+        if(!task) return alert("Task required.");
+        const h = parseInt(document.getElementById('f-h')?.value) || 0;
+        const m = parseInt(document.getElementById('f-m')?.value) || 30;
+        const totalMins = (h * 60) + m;
         db.collection("missions").add({
             type: currentTab, hub: document.getElementById('f-hub')?.value || document.getElementById('f-airport')?.value,
             task, pay: document.getElementById('f-pay')?.value || "Split",
-            expiryTime: Date.now() + (mins * 60 * 1000), 
+            expiryTime: Date.now() + (totalMins * 60 * 1000), 
             user: currentUser, phone: currentUserPhone,
-            runnerAgreed: false, rName: "", rPhone: "", connectedAt: null, lat: null, lng: null
-        }).then(() => { alert("Live on Radar!"); render(); });
+            runnerAgreed: false, rName: "", rPhone: "", connectedAt: null, lat: null, lng: null, wallpaper: 0
+        }).then(() => { alert("Live!"); render(); });
     }
 
     function startTracking(id) {
@@ -231,51 +300,70 @@
         }).then(() => startTracking(id));
     }
 
+    function openChat(missionId, otherPhone) {
+        currentChatId = missionId;
+        document.getElementById('chat-overlay').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        document.getElementById('call-btn').href = "tel:" + otherPhone;
+        const chatBox = document.getElementById('chat-messages');
+        if(chatListener) chatListener();
+        chatListener = db.collection("missions").doc(missionId).collection("chat").orderBy("time", "asc")
+            .onSnapshot(snap => {
+                chatBox.innerHTML = '';
+                snap.forEach(doc => {
+                    const msg = doc.data();
+                    const div = document.createElement('div');
+                    div.className = `msg ${msg.phone === currentUserPhone ? 'msg-me' : 'msg-them'}`;
+                    div.innerText = msg.text;
+                    chatBox.appendChild(div);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+    }
+
+    function closeChat() { document.getElementById('chat-overlay').style.display = 'none'; document.body.style.overflow = 'auto'; currentChatId = null; if(chatListener) chatListener(); }
+
+    function sendMessage(customText) {
+        const input = document.getElementById('chat-input');
+        const text = customText || input.value.trim();
+        if(!text || !currentChatId) return;
+        db.collection("missions").doc(currentChatId).collection("chat").add({ text, phone: currentUserPhone, time: Date.now() });
+        input.value = '';
+    }
+
+    function sendNudge() { if(currentChatId) sendMessage("🛎️ NUDGE! Check BuddyChat!"); }
+
     function render() {
         const form = document.getElementById('form-content');
         if (!form) return;
-        const timerSelect = `<select id="f-timer"><option value="15">15M</option><option value="30" selected>30M</option><option value="60">1H</option><option value="120">2H</option><option value="240">4H</option></select>`;
+        const scrollTimeHtml = `<div style="display:flex; gap:10px;"><div style="flex:1;"><label>Hours</label><select id="f-h"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div><div style="flex:1;"><label>Mins</label><select id="f-m"><option value="0">00</option><option value="15">15</option><option value="30" selected>30</option><option value="45">45</option></select></div></div>`;
         
         if (currentTab === 'errand') {
             form.innerHTML = `
-                <label>Quick Categories</label>
                 <div class="category-grid">
                     <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')"><span class="cat-icon">📦</span><span class="cat-label">Parcel</span></div>
                     <div class="cat-item" onclick="quickFill('🍔 Burger/Food', '🏛️ Adda')"><span class="cat-icon">🍔</span><span class="cat-label">Burger</span></div>
                     <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')"><span class="cat-icon">🚬</span><span class="cat-label">Sutta</span></div>
                 </div>
-                <label>Hub Location</label>
-                <select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option><option>✈️ Shamshabad</option></select>
-                <label>Task Description</label>
-                <input type="text" id="f-task" placeholder="Or type custom task...">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                    <div><label>Vanish in</label>${timerSelect}</div>
-                    <div><label>Bounty (₹)</label>
-                        <div class="bounty-row"><button class="bounty-chip" onclick="setBounty(20)">₹20</button><button class="bounty-chip" onclick="setBounty(50)">₹50</button></div>
-                        <input type="number" id="f-pay" placeholder="Custom">
-                    </div>
-                </div><button onclick="postMission()" class="btn-main">Broadcast Errand</button>`;
+                <label>Hub Location</label><select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option><option>✈️ Shamshabad</option></select>
+                <label>Task Description</label><input type="text" id="f-task" placeholder="Task details...">
+                <label>Vanish in</label>${scrollTimeHtml}
+                <label>Bounty (₹)</label><div class="bounty-row"><button class="bounty-chip" onclick="setBounty(20)">₹20</button><button class="bounty-chip" onclick="setBounty(50)">₹50</button></div>
+                <input type="number" id="f-pay" placeholder="Custom Bounty">
+                <button onclick="postMission()" class="btn-main">Broadcast Errand</button>`;
         } else {
             form.innerHTML = `
                 <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad</option><option>✈️ Shamshabad</option></select>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
-                    <div><label>Vanish in</label>${timerSelect}</div>
-                    <div><label>Pillar #</label><input type="text" id="f-pillar" placeholder="Pillar #"></div>
-                </div><button onclick="postMission()" class="btn-main">Find Partner</button>`;
+                <label>Vanish in</label>${scrollTimeHtml}
+                <label>Pillar #</label><input type="text" id="f-pillar" placeholder="Pillar #">
+                <button onclick="postMission()" class="btn-main">Find Partner</button>`;
         }
 
         const feed = document.getElementById('mission-feed');
         feed.innerHTML = '';
-        const filtered = database.filter(m => {
-            if (m.type !== currentTab) return false;
-            const isMyTask = m.phone === currentUserPhone;
-            const amIMatchedRunner = m.rPhone === currentUserPhone;
-            // Privacy filter: Only see unmatched tasks or tasks where you are a participant
-            if (isRunner) return !isMyTask && (!m.runnerAgreed || amIMatchedRunner);
-            else return isMyTask;
-        });
+        const filtered = database.filter(m => m.type === currentTab && (isRunner ? (m.phone !== currentUserPhone && (!m.runnerAgreed || m.rPhone === currentUserPhone)) : m.phone === currentUserPhone));
         
-        if(filtered.length === 0) feed.innerHTML = `<div style="text-align:center; padding:40px; color:var(--txt-dim); font-size:0.8rem;">Radar Clear.</div>`;
+        if(filtered.length === 0) feed.innerHTML = `<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.3); font-size:0.8rem;">Radar Clear.</div>`;
 
         filtered.forEach(m => {
             const card = document.createElement('div'); card.className = 'mission-card';
@@ -283,21 +371,29 @@
                 card.innerHTML = `
                 <div class="pill">${m.hub}</div>
                 <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between;"><span>${m.task}</span><span>₹${m.pay}</span></div>
-                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px;">👤 Requester: ${m.user}</div>
+                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px;">👤 ${m.user}</div>
                 ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}')" class="btn-main" style="margin-top:15px; padding:12px;">Help Buddy</button>` : 
-                `<div class="btn-action-row"><a href="https://wa.me/91${m.phone}" class="btn-small btn-chat">WhatsApp ${m.user}</a><div class="secure-box" style="margin-top:0; padding:12px;">Matched!</div></div>`}`;
+                `<div class="secure-box">
+                    <p style="font-size:0.85rem; margin-bottom:10px;">Helping <b>${m.user}</b></p>
+                    <div class="btn-action-row">
+                        <button onclick="openChat('${m.id}', '${m.phone}')" class="btn-small btn-chat">Chat</button>
+                        <a href="https://wa.me/91${m.phone}" class="btn-small" style="background:#25D366; color:white; display:flex; align-items:center; gap:5px;">💬 ${m.phone}</a>
+                    </div>
+                    <button onclick="removeMission('${m.id}')" class="btn-small btn-success" style="margin-top:10px;">Mark Delivered (Done)</button>
+                </div>`}`;
             } else {
                 card.innerHTML = `
                 <div class="pill">My Request</div>
                 <div style="font-weight:800; font-size:1.1rem;">${m.hub} ➔ ${m.task}</div>
                 ${m.runnerAgreed ? `
                 <div class="secure-box">
-                    <p style="font-size:0.85rem; margin-bottom:10px;"><b>${m.rName}</b> is on the way!</p>
-                    ${m.lat ? `<a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" class="btn-small btn-track">📍 Live Tracking</a>` : ''}
+                    <p style="font-size:0.85rem; margin-bottom:10px;"><b>${m.rName}</b> is helping!</p>
+                    ${m.lat ? `<a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" class="btn-small btn-track" style="margin-bottom:10px; display:block;">📍 Live tracking buddy</a>` : ''}
                     <div class="btn-action-row">
-                        <a href="https://wa.me/91${m.rPhone}" class="btn-small btn-chat">Chat Runner</a>
-                        <button onclick="removeMission('${m.id}')" class="btn-small btn-success">Done</button>
+                        <button onclick="openChat('${m.id}', '${m.rPhone}')" class="btn-small btn-chat">Chat</button>
+                        <a href="https://wa.me/91${m.rPhone}" class="btn-small" style="background:#25D366; color:white; display:flex; align-items:center; gap:5px;">💬 ${m.rPhone}</a>
                     </div>
+                    <button onclick="removeMission('${m.id}')" class="btn-small btn-success" style="margin-top:10px;">Done (Received)</button>
                 </div>` : `<button onclick="removeMission('${m.id}')" class="btn-small btn-cancel" style="margin-top:10px;">Cancel Request</button>`}`;
             }
             feed.appendChild(card);
@@ -306,4 +402,3 @@
 </script>
 </body>
 </html>
-
