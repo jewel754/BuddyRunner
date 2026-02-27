@@ -1,0 +1,16 @@
+{
+  "name": "BuddyRunner | Campus OS",
+  "short_name": "BuddyRunner",
+  "start_url": "/BuddyRunner/index.html",
+  "scope": "/BuddyRunner/",
+  "display": "standalone",
+  "background_color": "#0A1120",
+  "theme_color": "#FF8C00",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/726/726048.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
