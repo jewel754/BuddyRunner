@@ -40,8 +40,6 @@
             --danger: #EF4444; 
             --info: #3B82F6;
             --runner-glow: 0 0 30px rgba(255,140,0,0.3);
-            --neon-orange: #FF8C00;
-            --neon-blue: #3B82F6;
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -60,10 +58,6 @@
         body.runner-mode {
             background: linear-gradient(rgba(255, 140, 0, 0.2), rgba(10, 17, 32, 0.95)), url('https://images.unsplash.com/photo-1523050335392-93851179ae22?auto=format&fit=crop&w=1000&q=80');
             box-shadow: inset 0 0 100px rgba(255,140,0,0.1);
-        }
-        
-        body.runner-mode .container {
-            filter: drop-shadow(0 0 10px rgba(255,140,0,0.2));
         }
         
         #registration-screen { 
@@ -1216,7 +1210,9 @@
         const saved = localStorage.getItem('notifications');
         if (saved) {
             notifications = JSON.parse(saved);
+            unreadCount = notifications.filter(n => !n.read).length;
             updateNotificationBadge();
+            renderNotifications();
         }
     }
 
@@ -1250,9 +1246,9 @@
         panel.classList.toggle('show');
         if (panel.classList.contains('show')) {
             unreadCount = 0;
-            updateNotificationBadge();
             notifications.forEach(n => n.read = true);
             localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationBadge();
         }
     }
 
@@ -1379,7 +1375,7 @@
                 const newLevel = getKarmaDetails(currentHelps + 1).title;
                 if (oldLevel !== newLevel) {
                     showNotification("🎉 LEVEL UP!", `You're now a ${newLevel}!`);
-                    addNotification("Level Up! 🎉", `You're now a ${newLevel}!`, 'success');
+                    addNotification('Level Up! 🎉', `You're now a ${newLevel}!`, 'success');
                     celebrate();
                 }
             }
@@ -1899,7 +1895,7 @@
             filtered = database.filter(m => 
                 m.type === currentTab && 
                 m.phone !== currentUserPhone && 
-                !m.runnerAgreed
+                (!m.runnerAgreed || m.rPhone === currentUserPhone) // Show both pending and accepted by me
             );
         } else {
             filtered = database.filter(m => 
@@ -1926,23 +1922,45 @@
             const karmaDetails = getKarmaDetails(karmaCount);
             
             if(isRunner) {
-                card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div class="pill">📍 ${m.hub || 'Campus'}</div>
-                    <div class="reward-pill">🎁 ${m.reward || "Gratitude"}</div>
-                </div>
-                <div style="font-weight:800; font-size:1.2rem; margin-bottom:12px;">${m.task}</div>
-                <div style="font-size:0.85rem; color:var(--txt-dim); margin-bottom:15px; display:flex; align-items:center; justify-content:space-between;">
-                    <span>
-                        👤 ${m.user}
-                        <span class="karma-badge ${karmaDetails.class}">
-                            ${karmaDetails.icon} ${karmaDetails.title}
+                // Runner view
+                if (!m.runnerAgreed) {
+                    // Pending request - show accept button
+                    card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div class="pill">📍 ${m.hub || 'Campus'}</div>
+                        <div class="reward-pill">🎁 ${m.reward || "Gratitude"}</div>
+                    </div>
+                    <div style="font-weight:800; font-size:1.2rem; margin-bottom:12px;">${m.task}</div>
+                    <div style="font-size:0.85rem; color:var(--txt-dim); margin-bottom:15px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>
+                            👤 ${m.user}
+                            <span class="karma-badge ${karmaDetails.class}">
+                                ${karmaDetails.icon} ${karmaDetails.title}
+                            </span>
                         </span>
-                    </span>
-                    <span>⏰ ${new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                </div>
-                ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}')" class="btn-main">🚀 I'll Help! (Earn Karma)</button>` : ''}`;
+                        <span>⏰ ${new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <button onclick="handleHandshake('${m.id}')" class="btn-main">🚀 I'll Help! (Earn Karma)</button>`;
+                } else {
+                    // Already accepted by this runner - show helping details
+                    card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <div class="pill" style="background:rgba(16,185,129,0.15); color:var(--success);">🤝 Helping</div>
+                        <div class="reward-pill">🎁 ${m.reward || "Gratitude"}</div>
+                    </div>
+                    <div style="font-weight:800; font-size:1.2rem; margin-bottom:8px;">${m.hub} ➔ ${m.task}</div>
+                    <div class="secure-box">
+                        <p style="margin-bottom:10px;">You're helping <b>${m.user}</b></p>
+                        ${m.lat ? `<a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" class="btn-small btn-track" style="margin-bottom:10px;">📍 Track Location</a>` : ''}
+                        <div class="btn-action-row">
+                            <button onclick="openChat('${m.id}', '${m.phone}')" class="btn-small btn-chat">💬 Chat</button>
+                            <a href="https://wa.me/91${m.phone}" target="_blank" class="btn-small btn-wa">📱 WhatsApp</a>
+                        </div>
+                        <button onclick="removeMission('${m.id}')" class="btn-small btn-success" style="margin-top:10px;">✅ Mark Completed</button>
+                    </div>`;
+                }
             } else {
+                // Requester view
                 card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <div class="pill" style="background:rgba(59,130,246,0.15); color:var(--info);">📋 My Request</div>
