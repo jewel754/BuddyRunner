@@ -47,9 +47,33 @@
         .cat-item { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px 5px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .cat-item:active { background: rgba(255, 140, 0, 0.1); border-color: var(--primary); }
 
-        .bounty-row { display: flex; gap: 8px; margin-bottom: 15px; }
-        .bounty-chip { flex: 1; padding: 12px; border-radius: 15px; background: none; border: 1px solid var(--primary); color: var(--white); font-weight: 800; font-size: 0.8rem; cursor: pointer; }
-        .bounty-chip:focus { background: var(--primary); }
+        /* Karma Level Colors */
+        .lvl-newbie { color: #94A3B8; } /* Grey */
+        .lvl-pro { color: #3B82F6; }    /* Blue */
+        .lvl-legend { color: #FF8C00; text-shadow: 0 0 10px rgba(255,140,0,0.5); } /* Glowing Orange */
+
+        .reward-pill {
+            background: rgba(255, 140, 0, 0.1);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,140,0,0.2);
+        }
+
+        .karma-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            margin-left: 8px;
+        }
 
         .btn-main { width: 100%; padding: 18px; border: none; border-radius: 20px; background: var(--primary); color: white; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); }
         .btn-success { background: var(--success); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); width: 100%; color: white; }
@@ -167,6 +191,9 @@
     let currentChatId = null;
     let chatListener = null;
     
+    // Track user karma counts (helps completed)
+    let userKarmaCounts = {};
+    
     const wallpapers = [
         'none',
         'url("https://images.unsplash.com/photo-1541450805268-4822a3a774ca?q=80&w=1000")', // Lo-fi Night
@@ -178,7 +205,36 @@
         const storedPhone = localStorage.getItem('buddyRunnerPhone');
         const storedName = localStorage.getItem('buddyRunnerName');
         if (storedPhone) { currentUserPhone = storedPhone; currentUser = storedName || "KAKA RAO👺"; showApp(); }
+        loadKarmaCounts();
     };
+
+    // Load karma counts from Firestore
+    function loadKarmaCounts() {
+        db.collection("users").get().then((snapshot) => {
+            snapshot.forEach(doc => {
+                userKarmaCounts[doc.id] = doc.data().helps || 0;
+            });
+        });
+    }
+
+    // Update karma count when someone marks a mission as delivered
+    function updateKarmaCount(phone) {
+        if (!phone) return;
+        const userRef = db.collection("users").doc(phone);
+        userRef.get().then((doc) => {
+            const currentHelps = doc.exists ? (doc.data().helps || 0) : 0;
+            userRef.set({ helps: currentHelps + 1, name: currentUser }, { merge: true });
+            userKarmaCounts[phone] = currentHelps + 1;
+        });
+    }
+
+    // Logic to determine Level/Title based on "Helped" count
+    function getKarmaDetails(count) {
+        if (count >= 50) return { title: "HOSTEL LEGEND", class: "lvl-legend", icon: "👑" };
+        if (count >= 15) return { title: "CAMPUS PRO", class: "lvl-pro", icon: "⭐" };
+        if (count >= 5) return { title: "REGULAR", class: "lvl-pro", icon: "✨" };
+        return { title: "NEWBIE", class: "lvl-newbie", icon: "🌱" };
+    }
 
     db.collection("missions").onSnapshot((snapshot) => {
         const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -235,6 +291,10 @@
         if(phone.length !== 10) return alert("10-digit number required.");
         currentUser = name; currentUserPhone = phone;
         localStorage.setItem('buddyRunnerPhone', phone); localStorage.setItem('buddyRunnerName', name);
+        
+        // Initialize user in Firestore
+        db.collection("users").doc(phone).set({ name: name, helps: 0 }, { merge: true });
+        
         showApp();
     }
 
@@ -243,9 +303,20 @@
         if(document.getElementById('f-hub')) document.getElementById('f-hub').value = hub;
     }
 
-    function setBounty(val) { if(document.getElementById('f-pay')) document.getElementById('f-pay').value = val; }
-
-    function removeMission(id) { if(confirm("Confirm action?")) db.collection("missions").doc(id).delete(); }
+    function removeMission(id) { 
+        if(confirm("Confirm action?")) {
+            // Get mission data before deleting to update karma
+            db.collection("missions").doc(id).get().then(doc => {
+                const data = doc.data();
+                if (data && data.runnerAgreed && data.rPhone) {
+                    // Update karma for the helper
+                    updateKarmaCount(data.rPhone);
+                }
+            }).then(() => {
+                db.collection("missions").doc(id).delete();
+            });
+        }
+    }
 
     function logout() { if(confirm("Exit?")) { localStorage.clear(); location.reload(); } }
 
@@ -280,13 +351,31 @@
         const h = parseInt(document.getElementById('f-h')?.value) || 0;
         const m = parseInt(document.getElementById('f-m')?.value) || 30;
         const totalMins = (h * 60) + m;
+        
+        // Get the reward value (non-monetary)
+        const reward = document.getElementById('f-reward')?.value || "A Huge Thanks! 🙌";
+        
         db.collection("missions").add({
-            type: currentTab, hub: document.getElementById('f-hub')?.value || document.getElementById('f-airport')?.value,
-            task, pay: document.getElementById('f-pay')?.value || "Split",
+            type: currentTab, 
+            hub: document.getElementById('f-hub')?.value || document.getElementById('f-airport')?.value,
+            task, 
+            reward: reward, // Replace bounty with reward
             expiryTime: Date.now() + (totalMins * 60 * 1000), 
-            user: currentUser, phone: currentUserPhone,
-            runnerAgreed: false, rName: "", rPhone: "", connectedAt: null, lat: null, lng: null, wallpaper: 0
-        }).then(() => { alert("Live!"); render(); });
+            user: currentUser, 
+            phone: currentUserPhone,
+            runnerAgreed: false, 
+            rName: "", 
+            rPhone: "", 
+            connectedAt: null, 
+            lat: null, 
+            lng: null, 
+            wallpaper: 0,
+            timestamp: Date.now()
+        }).then(() => { 
+            alert("Posted to Radar!"); 
+            if(document.getElementById('f-task')) document.getElementById('f-task').value = "";
+            render(); 
+        });
     }
 
     function startTracking(id) {
@@ -349,11 +438,21 @@
                     <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')"><span class="cat-icon">🚬</span><span class="cat-label">Sutta</span></div>
                 </div>
                 <label>Hub Location</label><select id="f-hub"><option>🚪 Main Gate</option><option>🏛️ Adda</option><option>☕ Tapri</option><option>✈️ Shamshabad</option></select>
-                <label>Task Description</label><input type="text" id="f-task" placeholder="Task details...">
+                <label>What do you need?</label>
+                <input type="text" id="f-task" placeholder="e.g. Need a pen for the exam">
+                
+                <label>The "Thank You" Reward (Non-monetary)</label>
+                <select id="f-reward" style="width:100%; padding:15px; border-radius:15px; background:#161C2D; border:1px solid #334155; color:white; margin-bottom:15px;">
+                    <option value="A Huge Thanks! 🙌">A Huge Thanks! 🙌</option>
+                    <option value="I owe you one! 🤝">I owe you one! 🤝</option>
+                    <option value="Coffee on me later ☕">Coffee on me later ☕</option>
+                    <option value="A quick snack 🍪">A quick snack 🍪</option>
+                    <option value="Eternal Gratitude ✨">Eternal Gratitude ✨</option>
+                </select>
+                
                 <label>Vanish in</label>${scrollTimeHtml}
-                <label>Bounty (₹)</label><div class="bounty-row"><button class="bounty-chip" onclick="setBounty(20)">₹20</button><button class="bounty-chip" onclick="setBounty(50)">₹50</button></div>
-                <input type="number" id="f-pay" placeholder="Custom Bounty">
-                <button onclick="postMission()" class="btn-main">Broadcast Errand</button>`;
+                
+                <button onclick="postMission()" class="btn-main">Broadcast to Radar</button>`;
         } else {
             form.innerHTML = `
                 <label>Destination</label><select id="f-airport"><option>🛫 RGIA Airport</option><option>🚂 Secunderabad</option><option>✈️ Shamshabad</option></select>
@@ -370,11 +469,29 @@
 
         filtered.forEach(m => {
             const card = document.createElement('div'); card.className = 'mission-card';
+            
+            // Get karma level for the user
+            const karmaCount = userKarmaCounts[m.user] || 0;
+            const karmaDetails = getKarmaDetails(karmaCount);
+            
             if(isRunner) {
                 card.innerHTML = `
-                <div class="pill">${m.hub}</div>
-                <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between;"><span>${m.task}</span><span>₹${m.pay}</span></div>
-                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px;">👤 ${m.user}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div class="pill">${m.hub || 'Campus'}</div>
+                    <div class="reward-pill">${m.reward || "Gratitude 🙌"}</div>
+                </div>
+                <div style="font-weight:800; font-size:1.1rem; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span>${m.task}</span>
+                </div>
+                <div style="font-size:0.75rem; color:var(--txt-dim); margin-top:8px; display:flex; align-items:center;">
+                    👤 ${m.user}
+                    <span class="karma-badge ${karmaDetails.class}" style="background:rgba(255,255,255,0.05);">
+                        ${karmaDetails.icon} ${karmaDetails.title}
+                    </span>
+                </div>
+                <div style="font-size:0.7rem; color:var(--txt-dim); margin-bottom:15px;">
+                    ${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                </div>
                 ${!m.runnerAgreed ? `<button onclick="handleHandshake('${m.id}')" class="btn-main" style="margin-top:15px; padding:12px;">Help Buddy</button>` : 
                 `<div class="secure-box">
                     <p style="font-size:0.85rem; margin-bottom:10px;">Helping <b>${m.user}</b></p>
@@ -397,8 +514,11 @@
                 </div>`}`;
             } else {
                 card.innerHTML = `
-                <div class="pill">My Request</div>
-                <div style="font-weight:800; font-size:1.1rem;">${m.hub} ➔ ${m.task}</div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <div class="pill">My Request</div>
+                    <div class="reward-pill">${m.reward || "Gratitude 🙌"}</div>
+                </div>
+                <div style="font-weight:800; font-size:1.1rem; margin-bottom:8px;">${m.hub} ➔ ${m.task}</div>
                 ${m.runnerAgreed ? `
                 <div class="secure-box">
                     <p style="font-size:0.85rem; margin-bottom:10px;"><b>${m.rName}</b> is helping!</p>
@@ -427,5 +547,3 @@
 </script>
 </body>
 </html>
-
-
