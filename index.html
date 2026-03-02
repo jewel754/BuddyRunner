@@ -39,7 +39,9 @@
             --success: #10B981; 
             --danger: #EF4444; 
             --info: #3B82F6;
-            --runner-bg: linear-gradient(145deg, rgba(255,140,0,0.1) 0%, rgba(10,17,32,0.95) 100%);
+            --runner-glow: 0 0 30px rgba(255,140,0,0.3);
+            --neon-orange: #FF8C00;
+            --neon-blue: #3B82F6;
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -52,11 +54,16 @@
             color: var(--white); 
             padding-bottom: 140px; 
             overflow-x: hidden; 
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         body.runner-mode {
-            background: linear-gradient(rgba(255, 140, 0, 0.15), rgba(10, 17, 32, 0.95)), url('https://images.unsplash.com/photo-1523050335392-93851179ae22?auto=format&fit=crop&w=1000&q=80');
+            background: linear-gradient(rgba(255, 140, 0, 0.2), rgba(10, 17, 32, 0.95)), url('https://images.unsplash.com/photo-1523050335392-93851179ae22?auto=format&fit=crop&w=1000&q=80');
+            box-shadow: inset 0 0 100px rgba(255,140,0,0.1);
+        }
+        
+        body.runner-mode .container {
+            filter: drop-shadow(0 0 10px rgba(255,140,0,0.2));
         }
         
         #registration-screen { 
@@ -125,6 +132,93 @@
             align-items: center; 
             gap: 6px; 
             flex-shrink: 0; 
+        }
+
+        .notification-badge {
+            position: relative;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .notification-panel {
+            position: fixed;
+            top: 70px;
+            right: 10px;
+            left: 10px;
+            background: var(--card-navy);
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            z-index: 2000;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification-panel.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item.unread {
+            background: rgba(255,140,0,0.1);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 0.65rem;
+            color: var(--txt-dim);
         }
 
         .tab-nav { 
@@ -352,6 +446,16 @@
             color: white; 
         }
 
+        .btn-wa {
+            background: #25D366;
+            color: white;
+        }
+
+        .btn-track {
+            background: var(--success);
+            color: white;
+        }
+
         .mission-card { 
             background: var(--card-navy); 
             padding: 1.5rem; 
@@ -491,12 +595,26 @@
         }
         
         .chat-header { 
-            padding: 1.2rem; 
+            padding: 1rem 1.2rem; 
             background: var(--card-navy); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
+        
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-status {
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
         
         #chat-messages { 
@@ -547,6 +665,12 @@
             border-top: 1px solid rgba(255,255,255,0.05); 
         }
         
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         #chat-input { 
             flex: 1; 
             padding: 14px 20px; 
@@ -571,15 +695,25 @@
             justify-content: center; 
             font-size: 1.2rem;
             transition: all 0.2s ease;
+            box-shadow: 0 5px 15px rgba(255,140,0,0.3);
         }
 
         .chat-send:hover {
             transform: scale(1.1);
         }
 
+        .sticker-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+        }
+
         .sticker {
             background: rgba(255,255,255,0.05);
-            padding: 10px 15px;
+            padding: 8px 15px;
             border-radius: 25px;
             font-size: 0.8rem;
             cursor: pointer;
@@ -652,55 +786,62 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .quick-action-btn {
+        .fab {
             position: fixed;
             right: 20px;
             bottom: 100px;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: linear-gradient(145deg, var(--primary), #FFB347);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
-            box-shadow: 0 5px 20px rgba(255,140,0,0.4);
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(255,140,0,0.3);
             cursor: pointer;
             transition: all 0.3s ease;
             z-index: 999;
-            border: 2px solid white;
+            border: 2px solid rgba(255,255,255,0.3);
+            opacity: 0.9;
         }
 
-        .quick-action-btn:hover {
-            transform: scale(1.1) rotate(90deg);
+        .fab:hover {
+            transform: scale(1.1);
+            opacity: 1;
         }
 
-        .quick-action-menu {
+        .fab-menu {
             position: fixed;
             right: 20px;
-            bottom: 180px;
+            bottom: 160px;
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             z-index: 998;
         }
 
-        .quick-action-menu.show {
+        .fab-menu.show {
             display: flex;
         }
 
-        .quick-action-item {
+        .fab-item {
             background: var(--card-navy);
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 30px;
             border: 1px solid var(--primary);
             color: white;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
             backdrop-filter: blur(10px);
             animation: slideIn 0.3s ease;
             white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .fab-item:hover {
+            background: var(--primary);
         }
 
         @keyframes slideIn {
@@ -708,24 +849,36 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
-        .sos-button {
-            background: linear-gradient(145deg, #EF4444, #DC2626);
+        .sos-mini {
+            position: fixed;
+            left: 20px;
+            bottom: 100px;
+            background: rgba(239, 68, 68, 0.9);
             color: white;
-            padding: 12px;
-            border-radius: 50px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            font-weight: 800;
-            margin-top: 15px;
+            font-size: 1.2rem;
             cursor: pointer;
-            animation: sosPulse 1.5s infinite;
+            z-index: 999;
+            border: 2px solid white;
+            box-shadow: 0 0 20px rgba(239,68,68,0.5);
+            animation: sosPulse 2s infinite;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .sos-mini:hover {
+            transform: scale(1.1);
+            opacity: 1;
         }
 
         @keyframes sosPulse {
             0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(239,68,68,0); }
+            70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
             100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
         }
 
@@ -753,6 +906,89 @@
             font-size: 0.7rem;
             color: var(--txt-dim);
             text-transform: uppercase;
+        }
+
+        .online-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin-left: 8px;
+        }
+
+        .online-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .runner-mode-glow {
+            position: relative;
+        }
+
+        .runner-mode-glow::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), transparent);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0.5;
+            animation: glowPulse 2s infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .install-prompt {
+            position: fixed;
+            bottom: 80px;
+            left: 10px;
+            right: 10px;
+            background: linear-gradient(145deg, var(--primary), #FFB347);
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10000;
+            animation: slideUp 0.3s ease;
+            border: 2px solid white;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .install-prompt-text {
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .install-prompt-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -785,12 +1021,24 @@
     <header>
         <div style="font-weight: 800; font-size: 1.1rem; flex-shrink: 1;" class="text-logo">Buddy<span>Runner</span></div>
         <div class="header-group">
-            <button onclick="enableNotifications()" style="background:none; border:none; font-size:1.1rem; cursor:pointer; padding: 5px; border-radius: 8px;">🔔</button>
+            <div class="notification-badge" onclick="toggleNotificationPanel()">
+                <span style="font-size:1.2rem;">🔔</span>
+                <span class="notification-count" id="notification-count">0</span>
+            </div>
             <a href="https://docs.google.com/forms/d/e/1FAIpQLScN2j1rEhMBBlh28jWtbkvazL0zUZQ7y3otBTkROAmkfzQDKA/viewform?usp=sf_link" target="_blank" style="text-decoration:none; font-size:0.6rem; font-weight:800; color:var(--white); background: var(--info); padding: 6px 10px; border-radius: 8px; white-space: nowrap;">Feedback</a>
             <div id="u-display" style="font-size:0.6rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 10px; border-radius: 8px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
             <button onclick="logout()" class="logout-btn">Exit</button>
         </div>
     </header>
+    
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notification-panel">
+        <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="font-size:1rem;">Notifications</h4>
+            <button onclick="clearAllNotifications()" style="background:none; border:none; color:var(--txt-dim); font-size:0.7rem; cursor:pointer;">Clear all</button>
+        </div>
+        <div id="notification-list"></div>
+    </div>
     
     <!-- Stats Card -->
     <div id="stats-card" class="stats-card" style="display: none;">
@@ -808,6 +1056,14 @@
         </div>
     </div>
     
+    <!-- Online Status -->
+    <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 10px;">
+        <div class="online-indicator">
+            <span class="online-dot"></span>
+            <span id="online-status">Online</span>
+        </div>
+    </div>
+    
     <!-- Requester Mode Content -->
     <div id="requester-section">
         <div class="tab-nav">
@@ -820,21 +1076,20 @@
     
     <!-- Runner Mode Header -->
     <div id="runner-header" style="display: none; margin-bottom: 20px;">
-        <div style="background: linear-gradient(145deg, rgba(255,140,0,0.1), rgba(22,28,45,0.95)); padding: 20px; border-radius: 28px; border: 1px solid var(--primary);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 2.5rem; animation: float 3s ease-in-out infinite;">🛵</span>
+        <div class="runner-mode-glow" style="background: linear-gradient(145deg, rgba(255,140,0,0.15), rgba(22,28,45,0.95)); padding: 20px; border-radius: 28px; border: 2px solid var(--primary); position:relative;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-size: 2.5rem; filter: drop-shadow(0 0 10px var(--primary));">🛵</span>
                 <div>
-                    <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 5px;">Going Out Mode</h2>
-                    <p style="font-size: 0.85rem; color: var(--txt-dim);">Available to help others</p>
+                    <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 5px; color: var(--primary); text-shadow: 0 0 10px var(--primary);">GOING OUT MODE</h2>
+                    <p style="font-size: 0.9rem; color: var(--txt-dim);">You're available to help others! 🚀</p>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- SOS Button -->
-    <div class="sos-button" onclick="showSOS()" id="sos-button" style="display: none;">
-        <span>🆘</span>
-        <span>Emergency SOS</span>
+    <!-- Mini SOS Button -->
+    <div class="sos-mini" onclick="showSOS()" id="sos-button" style="display: none;">
+        🆘
     </div>
     
     <h3 id="radar-title" style="margin-bottom:15px; font-weight:800; color: var(--txt-dim); font-size: 0.75rem; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
@@ -845,38 +1100,40 @@
     <div id="mission-feed"></div>
 </div>
 
-<!-- Quick Action Button -->
-<div class="quick-action-btn" onclick="toggleQuickMenu()">➕</div>
-<div class="quick-action-menu" id="quick-menu">
-    <div class="quick-action-item" onclick="quickAction('parcel')">📦 Parcel</div>
-    <div class="quick-action-item" onclick="quickAction('food')">🍔 Food</div>
-    <div class="quick-action-item" onclick="quickAction('cab')">🚖 Cab</div>
-    <div class="quick-action-item" onclick="showLeaderboard()">🏆 Leaderboard</div>
-    <div class="quick-action-item" onclick="quickAction('sos')" style="color:#EF4444;">🆘 SOS</div>
+<!-- FAB (Floating Action Button) -->
+<div class="fab" onclick="toggleFabMenu()">➕</div>
+<div class="fab-menu" id="fab-menu">
+    <div class="fab-item" onclick="quickAction('parcel')">📦 Parcel</div>
+    <div class="fab-item" onclick="quickAction('food')">🍔 Food</div>
+    <div class="fab-item" onclick="quickAction('cab')">🚖 Cab</div>
+    <div class="fab-item" onclick="showLeaderboard()">🏆 Leaderboard</div>
+    <div class="fab-item" onclick="quickAction('sutta')">🚬 Sutta</div>
 </div>
 
 <div id="chat-overlay">
     <div class="chat-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite;"></div>
-            <div style="font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px;">BuddyChat</div>
+        <div class="chat-header-left">
+            <div class="chat-status"></div>
+            <div style="font-weight: 800; font-size: 1.2rem;">BuddyChat</div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
             <a id="call-btn" href="tel:" style="text-decoration:none; font-size:1.2rem; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 50%;">📞</a>
             <button onclick="syncWallpaper()" style="background:var(--info); border:none; color:white; padding: 8px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; cursor: pointer;">🎨 Theme</button>
             <button onclick="sendNudge()" style="background:rgba(255,140,0,0.2); border:1px solid var(--primary); color:var(--primary); font-weight:800; padding: 8px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer;">🔔 Nudge</button>
-            <button onclick="closeChat()" style="background:none; border:none; color:var(--danger); font-weight:800; cursor:pointer; font-size: 0.9rem;">✕</button>
+            <button onclick="closeChat()" style="background:none; border:none; color:var(--danger); font-weight:800; cursor:pointer; font-size: 1rem;">✕</button>
         </div>
     </div>
     <div id="chat-messages"></div>
     <div class="chat-input-box">
-        <div class="sticker-row" style="display:flex; gap:8px; overflow-x:auto; margin-bottom:10px;">
-            <div class="sticker" onclick="sendMessage('Abbey Jaldi Aa! 🐢')">🐢 Jaldi Aa</div>
-            <div class="sticker" onclick="sendMessage('Oye! Kahan reh gaya? 👺')">👺 Kahan h?</div>
-            <div class="sticker" onclick="sendMessage('5 min mein pahunch raha 🏃')">🏃 5 min</div>
-            <div class="sticker" onclick="sendMessage('Bhai please jaldi 🙏')">🙏 Jaldi</div>
+        <div class="sticker-row">
+            <div class="sticker" onclick="sendMessage('Bhai jaldi aa! 🏃')">🏃 Jaldi aa</div>
+            <div class="sticker" onclick="sendMessage('Kahan hai? 👀')">👀 Kahan hai?</div>
+            <div class="sticker" onclick="sendMessage('5 min mein 🕐')">🕐 5 min</div>
+            <div class="sticker" onclick="sendMessage('Pakad liya! 🎯')">🎯 Pakad liya</div>
+            <div class="sticker" onclick="sendMessage('Chai sutta ☕')">☕ Chai sutta</div>
+            <div class="sticker" onclick="sendMessage('Thanks bhai! 🙏')">🙏 Thanks</div>
         </div>
-        <div style="display:flex; gap:10px;">
+        <div class="chat-input-wrapper">
             <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
             <button class="chat-send" onclick="sendMessage()">➔</button>
         </div>
@@ -925,12 +1182,19 @@
     let activeUsers = [];
     let userKarmaCounts = {};
     let currentUserKarma = 0;
+    let notifications = [];
+    let unreadCount = 0;
     
+    // New GenZ wallpapers for chat
     const wallpapers = [
         'none',
-        'url("https://images.unsplash.com/photo-1541450805268-4822a3a774ca?q=80&w=1000")',
-        'url("https://images.unsplash.com/photo-1534030347209-467a5b0ad3e6?q=80&w=1000")',
-        'url("https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000")'
+        'url("https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000")', // Neon purple
+        'url("https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=1000")', // Cyberpunk
+        'url("https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=1000")', // Gradient
+        'url("https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000")', // Retro wave
+        'url("https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000")', // Gaming
+        'url("https://images.unsplash.com/photo-1518773553398-650c184e0bb3?q=80&w=1000")', // Tech
+        'url("https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000")'  // Vaporwave
     ];
 
     window.onload = () => {
@@ -944,8 +1208,81 @@
         loadKarmaCounts();
         checkAndShowInstallPrompt();
         updateStreak();
-        setInterval(updateUserActiveStatus, 60000);
+        setInterval(updateUserActiveStatus, 30000);
+        loadNotifications();
     };
+
+    function loadNotifications() {
+        const saved = localStorage.getItem('notifications');
+        if (saved) {
+            notifications = JSON.parse(saved);
+            updateNotificationBadge();
+        }
+    }
+
+    function addNotification(title, message, type = 'info') {
+        const notif = {
+            id: Date.now(),
+            title,
+            message,
+            type,
+            time: new Date().toLocaleTimeString(),
+            read: false
+        };
+        notifications.unshift(notif);
+        if (notifications.length > 20) notifications.pop();
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        unreadCount++;
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    function updateNotificationBadge() {
+        const badge = document.getElementById('notification-count');
+        if (badge) {
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? 'block' : 'none';
+        }
+    }
+
+    function toggleNotificationPanel() {
+        const panel = document.getElementById('notification-panel');
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) {
+            unreadCount = 0;
+            updateNotificationBadge();
+            notifications.forEach(n => n.read = true);
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+        }
+    }
+
+    function renderNotifications() {
+        const list = document.getElementById('notification-list');
+        if (!list) return;
+        
+        if (notifications.length === 0) {
+            list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--txt-dim);">No notifications yet</div>';
+            return;
+        }
+        
+        list.innerHTML = notifications.map(n => `
+            <div class="notification-item ${!n.read ? 'unread' : ''}">
+                <div class="notification-icon">${n.type === 'success' ? '✅' : n.type === 'error' ? '❌' : '💬'}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${n.title}</div>
+                    <div class="notification-time">${n.time}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function clearAllNotifications() {
+        notifications = [];
+        unreadCount = 0;
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotificationBadge();
+        renderNotifications();
+    }
 
     function checkAndShowInstallPrompt() {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -953,8 +1290,15 @@
         
         if (!isStandalone && !localStorage.getItem('installPromptShown')) {
             setTimeout(() => {
-                showToast(isIOS ? '📱 Tap Share → Add to Home Screen' : '📱 Install app for better experience', 'info', 5000);
+                const prompt = document.createElement('div');
+                prompt.className = 'install-prompt';
+                prompt.innerHTML = `
+                    <span class="install-prompt-text">📱 ${isIOS ? 'Tap Share → Add to Home Screen' : 'Install app for better experience'}</span>
+                    <button class="install-prompt-close" onclick="this.parentElement.remove()">✕</button>
+                `;
+                document.body.appendChild(prompt);
                 localStorage.setItem('installPromptShown', 'true');
+                setTimeout(() => prompt.remove(), 8000);
             }, 5000);
         }
     }
@@ -982,6 +1326,7 @@
                 icon: 'https://cdn-icons-png.flaticon.com/512/726/726048.png'
             });
         }
+        addNotification(title, body, 'info');
     }
 
     function loadKarmaCounts() {
@@ -1014,6 +1359,7 @@
                 isRunner: isRunner,
                 karmaCount: userKarmaCounts[currentUserPhone] || 0
             }, { merge: true });
+            document.getElementById('online-status').textContent = 'Online';
         }
     }
 
@@ -1033,6 +1379,7 @@
                 const newLevel = getKarmaDetails(currentHelps + 1).title;
                 if (oldLevel !== newLevel) {
                     showNotification("🎉 LEVEL UP!", `You're now a ${newLevel}!`);
+                    addNotification("Level Up! 🎉", `You're now a ${newLevel}!`, 'success');
                     celebrate();
                 }
             }
@@ -1090,6 +1437,7 @@
                 if (streak % 7 === 0) {
                     updateKarmaCount(currentUserPhone);
                     showToast('🔥 Weekly bonus: +1 Karma!', 'success');
+                    addNotification('Weekly Bonus! 🔥', 'You earned +1 Karma for 7-day streak!', 'success');
                     celebrate();
                 }
             } else {
@@ -1111,6 +1459,7 @@
             if (m.phone === currentUserPhone && m.runnerAgreed && !handledMatches.has(m.id)) {
                 handledMatches.add(m.id);
                 showNotification("🎉 Buddy Found!", `${m.rName} accepted your request!`);
+                addNotification('Buddy Found! 🎉', `${m.rName} is helping you!`, 'success');
                 celebrate();
             }
             if ((m.phone === currentUserPhone || m.rPhone === currentUserPhone) && m.runnerAgreed) {
@@ -1130,6 +1479,7 @@
             const sos = doc.data();
             if (sos.phone !== currentUserPhone) {
                 showToast(`🆘 SOS: ${sos.user} needs help nearby!`, 'error', 10000);
+                addNotification('SOS Alert! 🆘', `${sos.user} needs help nearby!`, 'error');
                 if (navigator.vibrate) navigator.vibrate([1000, 500, 1000]);
             }
         });
@@ -1145,6 +1495,7 @@
                     bar.classList.add('show');
                     if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
                     showNotification("💬 New Message", msg.text);
+                    addNotification('New Message 💬', msg.text, 'info');
                     setTimeout(() => bar.classList.remove('show'), 4000);
                 }
             }
@@ -1164,6 +1515,7 @@
             Notification.requestPermission().then(perm => {
                 if (perm === "granted") {
                     showToast("✅ Notifications enabled!", 'success');
+                    addNotification('Notifications Enabled', 'You\'ll now get alerts!', 'success');
                 }
             });
         }
@@ -1193,6 +1545,7 @@
                 if (data && data.runnerAgreed && data.rPhone) {
                     updateKarmaCount(data.rPhone);
                     showToast("✨ Karma +1 earned!", 'success');
+                    addNotification('Karma Earned! ✨', 'You helped someone! +1 Karma', 'success');
                     celebrate();
                 }
             }).then(() => {
@@ -1243,6 +1596,7 @@
             requesterSection.style.display = 'none';
             runnerHeader.style.display = 'block';
             showToast("🛵 You're now in Going Out mode", 'success');
+            addNotification('Going Out Mode 🛵', 'You\'re now available to help others!', 'success');
         } else {
             document.getElementById('m-status').innerText = "Requester Mode";
             document.getElementById('mode-icon').innerText = "🙋";
@@ -1262,6 +1616,7 @@
         const nextWall = ((currentM.wallpaper || 0) + 1) % wallpapers.length;
         db.collection("missions").doc(currentChatId).update({ wallpaper: nextWall });
         sendMessage("🎨 Changed chat theme!");
+        showToast("🎨 Theme changed!", 'success');
     }
 
     function postMission() {
@@ -1291,6 +1646,7 @@
             timestamp: Date.now()
         }).then(() => { 
             showToast("📢 Request posted successfully!", 'success');
+            addNotification('Request Posted 📢', 'Your request is now live!', 'success');
             if(document.getElementById('f-task')) document.getElementById('f-task').value = "";
             render(); 
         });
@@ -1310,6 +1666,7 @@
         }).then(() => {
             startTracking(id);
             showToast("✅ Request accepted! You're now helping!", 'success');
+            addNotification('Request Accepted ✅', 'You\'re now helping someone!', 'success');
             celebrate();
         });
     }
@@ -1354,15 +1711,16 @@
         if(currentChatId) {
             sendMessage("🛎️ NUDGE!");
             if(navigator.vibrate) navigator.vibrate(500);
+            showToast("🔔 Nudge sent!", 'info');
         }
     }
 
-    function toggleQuickMenu() {
-        document.getElementById('quick-menu').classList.toggle('show');
+    function toggleFabMenu() {
+        document.getElementById('fab-menu').classList.toggle('show');
     }
 
     function quickAction(action) {
-        toggleQuickMenu();
+        toggleFabMenu();
         switch(action) {
             case 'parcel':
                 setTab('errand', 0);
@@ -1374,12 +1732,14 @@
                 setTimeout(() => quickFill('🍔 Need Food', '🏛️ Adda'), 300);
                 showToast('Quick fill: Food request', 'success');
                 break;
+            case 'sutta':
+                setTab('errand', 0);
+                setTimeout(() => quickFill('🚬 Sutta/Smoke', '☕ Tapri'), 300);
+                showToast('Quick fill: Sutta request', 'success');
+                break;
             case 'cab':
                 setTab('ride', 100);
                 showToast('Quick fill: Cab share', 'success');
-                break;
-            case 'sos':
-                showSOS();
                 break;
         }
     }
@@ -1397,6 +1757,7 @@
                         resolved: false
                     }).then(() => {
                         showToast("🆘 SOS Alert Sent! Help is coming!", 'error', 5000);
+                        addNotification('SOS Sent! 🆘', 'Emergency alert sent to nearby users', 'error');
                         if (navigator.vibrate) navigator.vibrate([1000, 500, 1000]);
                     });
                 });
@@ -1406,7 +1767,15 @@
 
     function showLeaderboard() {
         const users = Object.entries(userKarmaCounts)
-            .map(([phone, helps]) => ({ phone, helps, name: database.find(m => m.phone === phone)?.user || 'Anonymous' }))
+            .map(([phone, helps]) => {
+                // Find user name from database
+                const userMission = database.find(m => m.phone === phone);
+                return { 
+                    phone, 
+                    helps, 
+                    name: userMission ? userMission.user : (phone === currentUserPhone ? currentUser : 'Buddy') 
+                };
+            })
             .sort((a, b) => b.helps - a.helps)
             .slice(0, 10);
         
@@ -1414,11 +1783,15 @@
         
         users.forEach((user, index) => {
             const rankColor = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? '#cd7f32' : 'none';
+            const isCurrentUser = user.phone === currentUserPhone;
             leaderboardHtml += `
-                <div style="display:flex; align-items:center; gap:15px; padding:15px; margin-bottom:10px; background:rgba(255,255,255,0.03); border-radius:15px; ${index < 3 ? 'border:2px solid ' + rankColor : ''}">
+                <div style="display:flex; align-items:center; gap:15px; padding:15px; margin-bottom:10px; background:${isCurrentUser ? 'rgba(255,140,0,0.2)' : 'rgba(255,255,255,0.03)'}; border-radius:15px; ${index < 3 ? 'border:2px solid ' + rankColor : ''}">
                     <div style="width:30px; height:30px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800;">#${index + 1}</div>
                     <div style="flex:1;">
-                        <div style="font-weight:800;">${user.name}</div>
+                        <div style="font-weight:800; display:flex; align-items:center; gap:5px;">
+                            ${user.name}
+                            ${isCurrentUser ? '<span style="font-size:0.6rem; background:var(--primary); padding:2px 6px; border-radius:10px;">YOU</span>' : ''}
+                        </div>
                         <div style="font-size:0.7rem; color:var(--txt-dim);">${user.helps} people helped</div>
                     </div>
                     <div>${getKarmaDetails(user.helps).icon}</div>
@@ -1466,17 +1839,12 @@
                     <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')"><span class="cat-icon">📦</span><span class="cat-label">Parcel</span></div>
                     <div class="cat-item" onclick="quickFill('🍔 Burger/Food', '🏛️ Adda')"><span class="cat-icon">🍔</span><span class="cat-label">Burger</span></div>
                     <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')"><span class="cat-icon">🚬</span><span class="cat-label">Sutta</span></div>
-                    <div class="cat-item" onclick="quickFill('📚 Books', '📖 Library')"><span class="cat-icon">📚</span><span class="cat-label">Books</span></div>
-                    <div class="cat-item" onclick="quickFill('💊 Medicine', '🏥 Medical')"><span class="cat-icon">💊</span><span class="cat-label">Medical</span></div>
-                    <div class="cat-item" onclick="quickFill('✏️ Stationery', '📝 Store')"><span class="cat-icon">✏️</span><span class="cat-label">Stationery</span></div>
                 </div>
                 <label>Location</label>
                 <select id="f-hub">
                     <option>🚪 Main Gate</option>
                     <option>🏛️ Adda</option>
                     <option>☕ Tapri</option>
-                    <option>📖 Library</option>
-                    <option>🏥 Medical Store</option>
                     <option>✈️ Shamshabad</option>
                 </select>
                 
@@ -1584,10 +1952,10 @@
                 ${m.runnerAgreed ? `
                 <div class="secure-box">
                     <p style="margin-bottom:10px;"><b>${m.rName}</b> is helping!</p>
-                    ${m.lat ? `<a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" class="btn-small" style="background:var(--success); color:white; margin-bottom:10px;">📍 Track Location</a>` : ''}
+                    ${m.lat ? `<a href="https://www.google.com/maps?q=${m.lat},${m.lng}" target="_blank" class="btn-small btn-track" style="margin-bottom:10px;">📍 Track Location</a>` : ''}
                     <div class="btn-action-row">
-                        <button onclick="openChat('${m.id}', '${m.phone}')" class="btn-small btn-chat">💬 Chat</button>
-                        <a href="https://wa.me/91${m.phone}" target="_blank" class="btn-small" style="background:#25D366; color:white;">📱 WhatsApp</a>
+                        <button onclick="openChat('${m.id}', '${m.rPhone}')" class="btn-small btn-chat">💬 Chat</button>
+                        <a href="https://wa.me/91${m.rPhone}" target="_blank" class="btn-small btn-wa">📱 WhatsApp</a>
                     </div>
                     <button onclick="removeMission('${m.id}')" class="btn-small btn-success" style="margin-top:10px;">✅ Mark Completed</button>
                 </div>` : 
