@@ -186,6 +186,27 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--txt-dim);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .notification-close:hover {
+            color: var(--danger);
+        }
+
         .notification-item {
             padding: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -254,7 +275,7 @@
             color: var(--white); 
         }
         
-        /* Glider updated for 3 tabs */
+        /* Glider for 3 tabs */
         .glider { 
             position: absolute; 
             height: calc(100% - 10px); 
@@ -781,28 +802,29 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* FAB - smaller and more subtle */
         .fab {
             position: fixed;
             right: 20px;
             bottom: 100px;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: linear-gradient(145deg, var(--primary), #FFB347);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: 0 5px 15px rgba(255,140,0,0.3);
+            font-size: 1.4rem;
+            box-shadow: 0 3px 10px rgba(255,140,0,0.3);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             z-index: 999;
-            border: 2px solid rgba(255,255,255,0.3);
-            opacity: 0.9;
+            border: 2px solid rgba(255,255,255,0.2);
+            opacity: 0.8;
         }
 
         .fab:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
             opacity: 1;
         }
 
@@ -822,17 +844,17 @@
 
         .fab-item {
             background: var(--card-navy);
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: 30px;
             border: 1px solid var(--primary);
             color: white;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             backdrop-filter: blur(10px);
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.2s ease;
             white-space: nowrap;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         }
 
         .fab-item:hover {
@@ -914,7 +936,7 @@
             50% { opacity: 0.7; }
         }
 
-        /* Game Overlay Styles (added) */
+        /* Game Overlay Styles */
         .game-overlay {
             position: fixed;
             top: 0;
@@ -976,13 +998,64 @@
             justify-content: center;
             margin-top: 20px;
         }
-        /* Snake canvas */
+        /* Snake canvas & touch controls */
         #snake-canvas {
             background: #1a1f2e;
             border: 2px solid var(--primary);
             border-radius: 20px;
             width: 100%;
             aspect-ratio: 1;
+        }
+        .snake-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .snake-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 5px 0;
+        }
+        .snake-btn {
+            background: var(--card-navy);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--primary);
+            transition: 0.2s;
+        }
+        .snake-btn:active {
+            background: var(--primary);
+            color: white;
+        }
+        /* People online modal */
+        .online-user-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+        .online-user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 800;
         }
     </style>
 </head>
@@ -1023,17 +1096,20 @@
             </div>
             <a href="https://docs.google.com/forms/d/e/1FAIpQLScN2j1rEhMBBlh28jWtbkvazL0zUZQ7y3otBTkROAmkfzQDKA/viewform?usp=sf_link" target="_blank" style="text-decoration:none; font-size:0.6rem; font-weight:800; color:var(--white); background: var(--info); padding: 6px 10px; border-radius: 8px; white-space: nowrap;">Feedback</a>
             <div id="u-display" style="font-size:0.6rem; font-weight:800; color:var(--primary); background: rgba(255, 140, 0, 0.1); padding: 6px 10px; border-radius: 8px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
-            <button onclick="logout()" class="logout-btn">Exit</button>
+            <button onclick="logout()" class="logout-btn">Logout</button>
         </div>
     </header>
     
-    <!-- Notification Panel -->
+    <!-- Notification Panel (with close button) -->
     <div class="notification-panel" id="notification-panel">
-        <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+        <div class="notification-header">
             <h4 style="font-size:1rem;">Notifications</h4>
-            <button onclick="clearAllNotifications()" style="background:none; border:none; color:var(--txt-dim); font-size:0.7rem; cursor:pointer;">Clear all</button>
+            <button class="notification-close" onclick="closeNotificationPanel()">✕</button>
         </div>
         <div id="notification-list"></div>
+        <div style="padding:10px; text-align:center;">
+            <button onclick="clearAllNotifications()" style="background:none; border:none; color:var(--txt-dim); font-size:0.7rem; cursor:pointer;">Clear all</button>
+        </div>
     </div>
     
     <!-- Stats Card -->
@@ -1092,14 +1168,11 @@
     <div id="mission-feed"></div>
 </div>
 
-<!-- FAB (Floating Action Button) -->
+<!-- FAB (Floating Action Button) - now with only two options -->
 <div class="fab" onclick="toggleFabMenu()">➕</div>
 <div class="fab-menu" id="fab-menu">
-    <div class="fab-item" onclick="quickAction('parcel')">📦 Parcel</div>
-    <div class="fab-item" onclick="quickAction('food')">🍔 Food</div>
-    <div class="fab-item" onclick="quickAction('cab')">🚖 Cab</div>
+    <div class="fab-item" onclick="showOnlineUsers()">👥 People Online</div>
     <div class="fab-item" onclick="showLeaderboard()">🏆 Leaderboard</div>
-    <div class="fab-item" onclick="quickAction('sutta')">🚬 Sutta</div>
 </div>
 
 <div id="chat-overlay">
@@ -1132,7 +1205,7 @@
     </div>
 </div>
 
-<!-- Game Overlays (added) -->
+<!-- Game Overlays -->
 <div id="tictactoe-overlay" class="game-overlay" style="display:none;">
     <div class="game-header">
         <div style="font-weight:800; font-size:1.2rem;">⭕ Tic Tac Toe ❌</div>
@@ -1153,12 +1226,23 @@
     </div>
     <canvas id="snake-canvas" width="400" height="400"></canvas>
     <div class="game-status" id="snake-status">Use arrow keys. Score: 0</div>
+    <!-- Touch controls for snake -->
+    <div class="snake-controls">
+        <div class="snake-row">
+            <div class="snake-btn" onclick="snakeSetDirection('UP')">⬆️</div>
+        </div>
+        <div class="snake-row">
+            <div class="snake-btn" onclick="snakeSetDirection('LEFT')">⬅️</div>
+            <div class="snake-btn" onclick="snakeSetDirection('DOWN')">⬇️</div>
+            <div class="snake-btn" onclick="snakeSetDirection('RIGHT')">➡️</div>
+        </div>
+    </div>
     <div class="game-controls">
         <button onclick="startSnake()" class="btn-small">New Game</button>
     </div>
 </div>
 
-<!-- New Mode Selector -->
+<!-- Mode Selector -->
 <div class="mode-selector" id="mode-selector">
     <div class="mode-option active" id="mode-request" onclick="setMode('requester')">
         <div class="mode-title">🙋 REQUEST MODE</div>
@@ -1224,7 +1308,7 @@
     let unreadCount = 0;
     let pendingChatId = null; // for notification click
     
-    // ---------- GAME STATE VARIABLES (added) ----------
+    // Game state variables
     let currentGameId = null;
     let gameListener = null;
     // Tic Tac Toe
@@ -1264,14 +1348,32 @@
         updateStreak();
         setInterval(updateUserActiveStatus, 30000);
         loadNotifications();
-        // Snake canvas init (will be set when opened)
+        // Start tracking active users
+        trackActiveUsers();
     };
 
+    // Track active users
+    function trackActiveUsers() {
+        // Clean up stale users (not seen in last 10 minutes)
+        const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
+        db.collection("activeUsers").where("lastSeen", "<", tenMinutesAgo).get().then(snapshot => {
+            snapshot.forEach(doc => doc.ref.delete());
+        });
+        // Listen to active users
+        db.collection("activeUsers").onSnapshot(snapshot => {
+            activeUsers = snapshot.docs.map(doc => ({ phone: doc.id, ...doc.data() }));
+        });
+    }
+
+    // Load and filter notifications older than 24h
     function loadNotifications() {
         const saved = localStorage.getItem('notifications');
         if (saved) {
             notifications = JSON.parse(saved);
+            const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+            notifications = notifications.filter(n => n.id > oneDayAgo);
             unreadCount = notifications.filter(n => !n.read).length;
+            localStorage.setItem('notifications', JSON.stringify(notifications));
             updateNotificationBadge();
             renderNotifications();
         }
@@ -1311,6 +1413,10 @@
             localStorage.setItem('notifications', JSON.stringify(notifications));
             updateNotificationBadge();
         }
+    }
+
+    function closeNotificationPanel() {
+        document.getElementById('notification-panel').classList.remove('show');
     }
 
     function renderNotifications() {
@@ -1617,7 +1723,6 @@
         render();
     }
 
-    // Updated setTab for three tabs
     function setTab(t, offset) { 
         currentTab = t; 
         let glider = document.getElementById('glider');
@@ -1775,32 +1880,65 @@
         document.getElementById('fab-menu').classList.toggle('show');
     }
 
-    function quickAction(action) {
-        toggleFabMenu();
-        switch(action) {
-            case 'parcel':
-                setTab('errand', 0);
-                setTimeout(() => quickFill('📦 Parcel at Gate', '🚪 Main Gate'), 300);
-                showToast('Quick fill: Parcel request', 'success');
-                break;
-            case 'food':
-                setTab('errand', 0);
-                setTimeout(() => quickFill('🍔 Need Food', '🏛️ Adda'), 300);
-                showToast('Quick fill: Food request', 'success');
-                break;
-            case 'sutta':
-                setTab('errand', 0);
-                setTimeout(() => quickFill('🚬 Sutta/Smoke', '☕ Tapri'), 300);
-                showToast('Quick fill: Sutta request', 'success');
-                break;
-            case 'cab':
-                setTab('ride', 100);
-                showToast('Quick fill: Cab share', 'success');
-                break;
+    // Show online users modal
+    function showOnlineUsers() {
+        toggleFabMenu(); // close menu
+        const onlineList = activeUsers.filter(u => u.phone !== currentUserPhone);
+        let html = '<div style="padding:20px;"><h3 style="margin-bottom:20px;">👥 People Online</h3>';
+        if (onlineList.length === 0) {
+            html += '<p style="color:var(--txt-dim);">No one else is online right now.</p>';
+        } else {
+            onlineList.forEach(user => {
+                const karmaDetails = getKarmaDetails(user.karmaCount || 0);
+                const minutesAgo = Math.floor((Date.now() - user.lastSeen) / 60000);
+                html += `
+                    <div class="online-user-card">
+                        <div class="online-user-avatar">${user.name.charAt(0)}</div>
+                        <div style="flex:1;">
+                            <div style="font-weight:800; display:flex; align-items:center; gap:5px;">
+                                ${user.name}
+                                <span class="karma-badge ${karmaDetails.class}" style="font-size:0.6rem;">
+                                    ${karmaDetails.icon} ${karmaDetails.title}
+                                </span>
+                            </div>
+                            <div style="font-size:0.7rem; color:var(--txt-dim);">
+                                ${user.isRunner ? '🛵 Going Out' : '🙋 Online'} • ${minutesAgo < 1 ? 'Just now' : minutesAgo + 'm ago'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
         }
+        html += '</div>';
+        
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 10002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        `;
+        modal.innerHTML = `
+            <div style="background: var(--card-navy); border-radius: 30px; max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto; border: 2px solid var(--primary);">
+                <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size:1.2rem;">👥 People Online</h3>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
+                </div>
+                <div>${html}</div>
+            </div>
+        `;
+        document.body.appendChild(modal);
     }
 
     function showLeaderboard() {
+        toggleFabMenu();
         const users = Object.entries(userKarmaCounts)
             .map(([phone, helps]) => {
                 const userMission = database.find(m => m.phone === phone);
@@ -1863,7 +2001,6 @@
 
     // ==================== GAMES FUNCTIONS ====================
 
-    // Open/Close games
     function openTicTacToe() {
         document.getElementById('tictactoe-overlay').style.display = 'flex';
         document.body.style.overflow = 'hidden';
@@ -1888,7 +2025,7 @@
         document.body.style.overflow = 'auto';
     }
 
-    // ---------- Tic Tac Toe (multiplayer via Firestore) ----------
+    // ---------- Tic Tac Toe ----------
     function findTicTacToeOpponent() {
         const status = document.getElementById('tictactoe-status');
         status.innerText = 'Looking for opponent...';
@@ -2068,7 +2205,6 @@
     }
 
     function playVsComputerTicTacToe() {
-        // Local game vs computer
         tictactoeBoard = ['', '', '', '', '', '', '', '', ''];
         tictactoeMySymbol = 'X';
         tictactoeTurn = 'X';
@@ -2124,18 +2260,15 @@
             case 'UP': head.y--; break;
             case 'DOWN': head.y++; break;
         }
-        // Check wall collision
         if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
             gameOver();
             return;
         }
-        // Check self collision
         if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
             gameOver();
             return;
         }
         snake.unshift(head);
-        // Check food
         if (head.x === food.x && head.y === food.y) {
             score++;
             document.getElementById('snake-status').innerText = `Score: ${score}`;
@@ -2159,7 +2292,6 @@
         gameRunning = false;
         clearInterval(gameInterval);
         document.getElementById('snake-status').innerText = `Game Over! Score: ${score}`;
-        // Give karma for reaching certain scores? optional
         if (score >= 5) {
             updateKarmaCount(currentUserPhone);
             showToast('🐍 +1 Karma for score 5+!', 'success');
@@ -2177,14 +2309,24 @@
         }
     }
 
-    // Modified render to include Games tab
+    // Touch controls for snake
+    function snakeSetDirection(dir) {
+        if (!gameRunning) return;
+        if ((dir === 'RIGHT' && direction !== 'LEFT') ||
+            (dir === 'LEFT' && direction !== 'RIGHT') ||
+            (dir === 'UP' && direction !== 'DOWN') ||
+            (dir === 'DOWN' && direction !== 'UP')) {
+            nextDirection = dir;
+        }
+    }
+
+    // Render function (Games tab and forms)
     function render() {
         const form = document.getElementById('form-content');
         if (!form) return;
         
         const scrollTimeHtml = `<div style="display:flex; gap:10px;"><div style="flex:1;"><label>Hours</label><select id="f-h"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div><div style="flex:1;"><label>Mins</label><select id="f-m"><option value="0">00</option><option value="15">15</option><option value="30" selected>30</option><option value="45">45</option></select></div></div>`;
         
-        // Games tab
         if (currentTab === 'games' && !isRunner) {
             form.innerHTML = `
                 <h3 style="margin-bottom:20px;">🎮 Play Games & Earn Karma</h3>
@@ -2205,12 +2347,9 @@
             return;
         }
         
-        // In runner mode, clear the form (no posting)
         if (isRunner) {
             form.innerHTML = '';
-        } 
-        // In requester mode, show appropriate form
-        else if (currentTab === 'errand') {
+        } else if (currentTab === 'errand') {
             form.innerHTML = `
                 <div class="category-grid">
                     <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')"><span class="cat-icon">📦</span><span class="cat-label">Parcel</span></div>
