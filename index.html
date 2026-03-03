@@ -1250,6 +1250,9 @@
     let rpsGameId = null;
     let rpsListener = null;
     
+    // Track notified requests for runners
+    let notifiedNewRequests = new Set();
+    
     const wallpapers = [
         'none',
         'url("https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000")',
@@ -1501,6 +1504,8 @@
 
     db.collection("missions").onSnapshot((snapshot) => {
         const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Process matches (when runner accepts)
         newData.forEach(m => {
             if (m.phone === currentUserPhone && m.runnerAgreed && !handledMatches.has(m.id)) {
                 handledMatches.add(m.id);
@@ -1515,9 +1520,36 @@
                 }
             }
         });
+
+        // Notify runner about new requests
+        newData.forEach(m => {
+            if (isRunner && 
+                m.type === currentTab && 
+                m.phone !== currentUserPhone && 
+                !m.runnerAgreed && 
+                !notifiedNewRequests.has(m.id)) {
+                
+                notifiedNewRequests.add(m.id);
+                showNotification("📢 New Request!", `${m.user} needs help: ${m.task}`);
+                addNotification('New Request', `${m.user} needs help: ${m.task}`, 'info');
+                if (navigator.vibrate) navigator.vibrate(200);
+            }
+        });
+
         database = newData;
         processVanishLogic();
         render();
+    });
+
+    db.collection("sos").where("resolved", "==", false).onSnapshot(snapshot => {
+        snapshot.forEach(doc => {
+            const sos = doc.data();
+            if (sos.phone !== currentUserPhone) {
+                showToast(`🆘 SOS: ${sos.user} needs help nearby!`, 'error', 10000);
+                addNotification('SOS Alert! 🆘', `${sos.user} needs help nearby!`, 'error');
+                if (navigator.vibrate) navigator.vibrate([1000, 500, 1000]);
+            }
+        });
     });
 
     function setupNotifListener(mid) {
@@ -2164,6 +2196,7 @@
 
     function playRPS(choice) {
         if (!currentGameId) {
+            // Play vs computer
             playVsComputerRPS(choice);
             return;
         }
@@ -2183,11 +2216,15 @@
         findRPSOpponent();
     }
 
+    // Unified playVsComputerRPS function
     function playVsComputerRPS(choice) {
-        if (!choice) {
-            // Called from button, will be handled by direct click
+        if (choice === undefined) {
+            // Called from button without argument: reset for new game
+            document.getElementById('rps-status').innerText = 'Choose your move!';
+            currentGameId = null;
             return;
         }
+        // Actual game logic
         const choices = ['rock', 'paper', 'scissors'];
         const computerChoice = choices[Math.floor(Math.random() * 3)];
         let result = '';
@@ -2211,13 +2248,7 @@
         document.getElementById('rps-status').innerText = `${message} (You: ${choice}, Computer: ${computerChoice})`;
     }
 
-    function playVsComputerRPS() {
-        // Just reset status, user can click choices directly
-        document.getElementById('rps-status').innerText = 'Choose your move!';
-        currentGameId = null;
-    }
-
-    // Render function (modified to include games tab)
+    // Render function
     function render() {
         const form = document.getElementById('form-content');
         if (!form) return;
@@ -2244,62 +2275,68 @@
             return;
         }
         
-        if (currentTab === 'errand' && !isRunner) {
-            form.innerHTML = `
-                <div class="category-grid">
-                    <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')"><span class="cat-icon">📦</span><span class="cat-label">Parcel</span></div>
-                    <div class="cat-item" onclick="quickFill('🍔 Burger/Food', '🏛️ Adda')"><span class="cat-icon">🍔</span><span class="cat-label">Burger</span></div>
-                    <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')"><span class="cat-icon">🚬</span><span class="cat-label">Sutta</span></div>
-                </div>
-                <label>Location</label>
-                <select id="f-hub">
-                    <option>🚪 Main Gate</option>
-                    <option>🏛️ Adda</option>
-                    <option>☕ Tapri</option>
-                    <option>✈️ Shamshabad</option>
-                </select>
-                
-                <label>What do you need?</label>
-                <input type="text" id="f-task" placeholder="e.g. Need a pen for the exam">
-                
-                <label>Reward</label>
-                <select id="f-reward">
-                    <option value="A Huge Thanks! 🙌">A Huge Thanks! 🙌</option>
-                    <option value="I owe you one! 🤝">I owe you one! 🤝</option>
-                    <option value="Coffee on me later ☕">Coffee on me later ☕</option>
-                    <option value="A quick snack 🍪">A quick snack 🍪</option>
-                    <option value="Eternal Gratitude ✨">Eternal Gratitude ✨</option>
-                    <option value="Chai Sutta ☕">Chai Sutta ☕</option>
-                </select>
-                
-                <label>Vanish in</label>
-                ${scrollTimeHtml}
-                
-                <button onclick="postMission()" class="btn-main">🚀 Broadcast Request</button>`;
-        } else if (currentTab === 'ride' && !isRunner) {
-            form.innerHTML = `
-                <label>Destination</label>
-                <select id="f-airport">
-                    <option>🛫 RGIA Airport</option>
-                    <option>🚂 Secunderabad</option>
-                    <option>✈️ Shamshabad</option>
-                    <option>🏙️ Hi-Tech City</option>
-                </select>
-                
-                <label>Pillar #</label>
-                <input type="text" id="f-pillar" placeholder="e.g. Pillar 7">
-                
-                <label>Departure in</label>
-                ${scrollTimeHtml}
-                
-                <label>Share Type</label>
-                <select id="f-reward">
-                    <option value="Split the fare 🚖">Split the fare 🚖</option>
-                    <option value="Coffee on me ☕">Coffee on me ☕</option>
-                    <option value="Snacks on me 🍟">Snacks on me 🍟</option>
-                </select>
-                
-                <button onclick="postMission()" class="btn-main">🚖 Find Partner</button>`;
+        // Only show form in requester mode and non-games tabs
+        if (!isRunner) {
+            if (currentTab === 'errand') {
+                form.innerHTML = `
+                    <div class="category-grid">
+                        <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')"><span class="cat-icon">📦</span><span class="cat-label">Parcel</span></div>
+                        <div class="cat-item" onclick="quickFill('🍔 Burger/Food', '🏛️ Adda')"><span class="cat-icon">🍔</span><span class="cat-label">Burger</span></div>
+                        <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')"><span class="cat-icon">🚬</span><span class="cat-label">Sutta</span></div>
+                    </div>
+                    <label>Location</label>
+                    <select id="f-hub">
+                        <option>🚪 Main Gate</option>
+                        <option>🏛️ Adda</option>
+                        <option>☕ Tapri</option>
+                        <option>✈️ Shamshabad</option>
+                    </select>
+                    
+                    <label>What do you need?</label>
+                    <input type="text" id="f-task" placeholder="e.g. Need a pen for the exam">
+                    
+                    <label>Reward</label>
+                    <select id="f-reward">
+                        <option value="A Huge Thanks! 🙌">A Huge Thanks! 🙌</option>
+                        <option value="I owe you one! 🤝">I owe you one! 🤝</option>
+                        <option value="Coffee on me later ☕">Coffee on me later ☕</option>
+                        <option value="A quick snack 🍪">A quick snack 🍪</option>
+                        <option value="Eternal Gratitude ✨">Eternal Gratitude ✨</option>
+                        <option value="Chai Sutta ☕">Chai Sutta ☕</option>
+                    </select>
+                    
+                    <label>Vanish in</label>
+                    ${scrollTimeHtml}
+                    
+                    <button onclick="postMission()" class="btn-main">🚀 Broadcast Request</button>`;
+            } else if (currentTab === 'ride') {
+                form.innerHTML = `
+                    <label>Destination</label>
+                    <select id="f-airport">
+                        <option>🛫 RGIA Airport</option>
+                        <option>🚂 Secunderabad</option>
+                        <option>✈️ Shamshabad</option>
+                        <option>🏙️ Hi-Tech City</option>
+                    </select>
+                    
+                    <label>Pillar #</label>
+                    <input type="text" id="f-pillar" placeholder="e.g. Pillar 7">
+                    
+                    <label>Departure in</label>
+                    ${scrollTimeHtml}
+                    
+                    <label>Share Type</label>
+                    <select id="f-reward">
+                        <option value="Split the fare 🚖">Split the fare 🚖</option>
+                        <option value="Coffee on me ☕">Coffee on me ☕</option>
+                        <option value="Snacks on me 🍟">Snacks on me 🍟</option>
+                    </select>
+                    
+                    <button onclick="postMission()" class="btn-main">🚖 Find Partner</button>`;
+            }
+        } else {
+            // In runner mode, clear the form content (hide it)
+            form.innerHTML = '';
         }
 
         const feed = document.getElementById('mission-feed');
