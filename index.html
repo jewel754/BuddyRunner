@@ -254,6 +254,7 @@
             color: var(--white); 
         }
         
+        /* Glider updated for 3 tabs */
         .glider { 
             position: absolute; 
             height: calc(100% - 10px); 
@@ -913,7 +914,7 @@
             50% { opacity: 0.7; }
         }
 
-        /* Game Overlay Styles */
+        /* Game Overlay Styles (added) */
         .game-overlay {
             position: fixed;
             top: 0;
@@ -969,37 +970,25 @@
             color: var(--primary);
             font-weight: 600;
         }
-        .rps-choices {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-        }
-        .rps-choice {
-            background: var(--card-navy);
-            border: 2px solid var(--primary);
-            border-radius: 30px;
-            padding: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: 0.2s;
-            flex: 1;
-            max-width: 120px;
-        }
-        .rps-choice:hover {
-            background: var(--primary);
-            transform: scale(1.1);
-        }
         .game-controls {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin-top: 20px;
         }
+        /* Snake canvas */
+        #snake-canvas {
+            background: #1a1f2e;
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            width: 100%;
+            aspect-ratio: 1;
+        }
     </style>
 </head>
 <body>
 
+<!-- Platform notification (clickable) -->
 <div id="platform-notification" onclick="handleNotificationClick()">
     <div style="background:var(--primary); width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">💬</div>
     <div>
@@ -1071,16 +1060,16 @@
         </div>
     </div>
     
-    <!-- Tabs: Errands, Cab Share, Games -->
-    <div class="tab-nav">
-        <div class="glider" id="glider"></div>
-        <div class="tab-btn active" onclick="setTab('errand', 0)">Errands</div>
-        <div class="tab-btn" onclick="setTab('ride', 100)">Cab Share</div>
-        <div class="tab-btn" onclick="setTab('games', 200)">🎮 Games</div>
+    <!-- Requester Mode Content (tabs now include Games) -->
+    <div id="requester-section">
+        <div class="tab-nav">
+            <div class="glider" id="glider"></div>
+            <div class="tab-btn active" onclick="setTab('errand', 0)">Errands</div>
+            <div class="tab-btn" onclick="setTab('ride', 100)">Cab Share</div>
+            <div class="tab-btn" onclick="setTab('games', 200)">🎮 Games</div>
+        </div>
+        <div class="glass-card" id="form-content"></div>
     </div>
-    
-    <!-- Dynamic content area (form or game cards) -->
-    <div class="glass-card" id="form-content"></div>
     
     <!-- Runner Mode Header -->
     <div id="runner-header" style="display: none; margin-bottom: 20px;">
@@ -1113,7 +1102,6 @@
     <div class="fab-item" onclick="quickAction('sutta')">🚬 Sutta</div>
 </div>
 
-<!-- Chat Overlay -->
 <div id="chat-overlay">
     <div class="chat-header">
         <div class="chat-header-left">
@@ -1144,7 +1132,7 @@
     </div>
 </div>
 
-<!-- Game Overlays -->
+<!-- Game Overlays (added) -->
 <div id="tictactoe-overlay" class="game-overlay" style="display:none;">
     <div class="game-header">
         <div style="font-weight:800; font-size:1.2rem;">⭕ Tic Tac Toe ❌</div>
@@ -1158,24 +1146,19 @@
     </div>
 </div>
 
-<div id="rps-overlay" class="game-overlay" style="display:none;">
+<div id="snake-overlay" class="game-overlay" style="display:none;">
     <div class="game-header">
-        <div style="font-weight:800; font-size:1.2rem;">✊ Rock Paper Scissors ✋</div>
-        <button onclick="closeGame('rps')" style="background:none; border:none; color:var(--danger); font-size:1.2rem;">✕</button>
+        <div style="font-weight:800; font-size:1.2rem;">🐍 Classic Snake</div>
+        <button onclick="closeGame('snake')" style="background:none; border:none; color:var(--danger); font-size:1.2rem;">✕</button>
     </div>
-    <div class="rps-choices">
-        <button class="rps-choice" onclick="playRPS('rock')">✊ Rock</button>
-        <button class="rps-choice" onclick="playRPS('paper')">✋ Paper</button>
-        <button class="rps-choice" onclick="playRPS('scissors')">✌️ Scissors</button>
-    </div>
-    <div class="game-status" id="rps-status">Choose your move!</div>
+    <canvas id="snake-canvas" width="400" height="400"></canvas>
+    <div class="game-status" id="snake-status">Use arrow keys. Score: 0</div>
     <div class="game-controls">
-        <button onclick="resetRPS()" class="btn-small">New Game</button>
-        <button onclick="playVsComputerRPS()" class="btn-small">Play vs Computer</button>
+        <button onclick="startSnake()" class="btn-small">New Game</button>
     </div>
 </div>
 
-<!-- Mode Selector -->
+<!-- New Mode Selector -->
 <div class="mode-selector" id="mode-selector">
     <div class="mode-option active" id="mode-request" onclick="setMode('requester')">
         <div class="mode-title">🙋 REQUEST MODE</div>
@@ -1239,19 +1222,24 @@
     let currentUserKarma = 0;
     let notifications = [];
     let unreadCount = 0;
-    let pendingChatId = null;
+    let pendingChatId = null; // for notification click
     
-    // Game state variables
+    // ---------- GAME STATE VARIABLES (added) ----------
     let currentGameId = null;
     let gameListener = null;
+    // Tic Tac Toe
     let tictactoeBoard = ['', '', '', '', '', '', '', '', ''];
     let tictactoeTurn = 'X';
     let tictactoeMySymbol = null;
-    let rpsGameId = null;
-    let rpsListener = null;
-    
-    // Track notified requests for runners
-    let notifiedNewRequests = new Set();
+    // Snake
+    let snakeCanvas, ctx;
+    let snake = [];
+    let food = {};
+    let direction = 'RIGHT';
+    let nextDirection = 'RIGHT';
+    let score = 0;
+    let gameInterval = null;
+    let gameRunning = false;
     
     const wallpapers = [
         'none',
@@ -1276,6 +1264,7 @@
         updateStreak();
         setInterval(updateUserActiveStatus, 30000);
         loadNotifications();
+        // Snake canvas init (will be set when opened)
     };
 
     function loadNotifications() {
@@ -1504,8 +1493,6 @@
 
     db.collection("missions").onSnapshot((snapshot) => {
         const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Process matches (when runner accepts)
         newData.forEach(m => {
             if (m.phone === currentUserPhone && m.runnerAgreed && !handledMatches.has(m.id)) {
                 handledMatches.add(m.id);
@@ -1520,36 +1507,9 @@
                 }
             }
         });
-
-        // Notify runner about new requests
-        newData.forEach(m => {
-            if (isRunner && 
-                m.type === currentTab && 
-                m.phone !== currentUserPhone && 
-                !m.runnerAgreed && 
-                !notifiedNewRequests.has(m.id)) {
-                
-                notifiedNewRequests.add(m.id);
-                showNotification("📢 New Request!", `${m.user} needs help: ${m.task}`);
-                addNotification('New Request', `${m.user} needs help: ${m.task}`, 'info');
-                if (navigator.vibrate) navigator.vibrate(200);
-            }
-        });
-
         database = newData;
         processVanishLogic();
         render();
-    });
-
-    db.collection("sos").where("resolved", "==", false).onSnapshot(snapshot => {
-        snapshot.forEach(doc => {
-            const sos = doc.data();
-            if (sos.phone !== currentUserPhone) {
-                showToast(`🆘 SOS: ${sos.user} needs help nearby!`, 'error', 10000);
-                addNotification('SOS Alert! 🆘', `${sos.user} needs help nearby!`, 'error');
-                if (navigator.vibrate) navigator.vibrate([1000, 500, 1000]);
-            }
-        });
     });
 
     function setupNotifListener(mid) {
@@ -1657,6 +1617,7 @@
         render();
     }
 
+    // Updated setTab for three tabs
     function setTab(t, offset) { 
         currentTab = t; 
         let glider = document.getElementById('glider');
@@ -1900,32 +1861,34 @@
         document.body.appendChild(modal);
     }
 
-    // ==================== GAMES ====================
+    // ==================== GAMES FUNCTIONS ====================
 
+    // Open/Close games
     function openTicTacToe() {
         document.getElementById('tictactoe-overlay').style.display = 'flex';
         document.body.style.overflow = 'hidden';
         findTicTacToeOpponent();
     }
 
-    function openRPS() {
-        document.getElementById('rps-overlay').style.display = 'flex';
+    function openSnake() {
+        document.getElementById('snake-overlay').style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        findRPSOpponent();
+        startSnake();
     }
 
     function closeGame(game) {
         if (game === 'tictactoe') {
             if (gameListener) gameListener();
             document.getElementById('tictactoe-overlay').style.display = 'none';
-        } else {
-            if (rpsListener) rpsListener();
-            document.getElementById('rps-overlay').style.display = 'none';
+        } else if (game === 'snake') {
+            if (gameInterval) clearInterval(gameInterval);
+            gameRunning = false;
+            document.getElementById('snake-overlay').style.display = 'none';
         }
         document.body.style.overflow = 'auto';
     }
 
-    // Tic Tac Toe
+    // ---------- Tic Tac Toe (multiplayer via Firestore) ----------
     function findTicTacToeOpponent() {
         const status = document.getElementById('tictactoe-status');
         status.innerText = 'Looking for opponent...';
@@ -2019,7 +1982,29 @@
     }
 
     function makeTicTacToeMove(index) {
-        if (!currentGameId) return;
+        if (!currentGameId || currentGameId === 'local') {
+            // Local vs computer
+            if (tictactoeBoard[index] !== '' || tictactoeTurn !== tictactoeMySymbol) return;
+            tictactoeBoard[index] = tictactoeMySymbol;
+            renderTicTacToeBoard();
+            const winner = checkTicTacToeWinner(tictactoeBoard);
+            if (winner) {
+                if (winner === 'X') {
+                    document.getElementById('tictactoe-status').innerText = 'You win! +1 Karma';
+                    updateKarmaCount(currentUserPhone);
+                } else if (winner === 'O') {
+                    document.getElementById('tictactoe-status').innerText = 'Computer wins!';
+                } else {
+                    document.getElementById('tictactoe-status').innerText = 'Draw!';
+                }
+                return;
+            }
+            tictactoeTurn = tictactoeMySymbol === 'X' ? 'O' : 'X';
+            document.getElementById('tictactoe-status').innerText = 'Computer thinking...';
+            setTimeout(computerMoveTicTacToe, 500);
+            return;
+        }
+        // Online game
         if (tictactoeBoard[index] !== '') return;
         if (tictactoeTurn !== tictactoeMySymbol) return;
         
@@ -2031,6 +2016,31 @@
             board: newBoard,
             turn: nextTurn
         });
+    }
+
+    function computerMoveTicTacToe() {
+        const emptyIndices = tictactoeBoard.reduce((acc, cell, idx) => cell === '' ? [...acc, idx] : acc, []);
+        if (emptyIndices.length === 0) return;
+        const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        tictactoeBoard[move] = tictactoeMySymbol === 'X' ? 'O' : 'X';
+        renderTicTacToeBoard();
+        const winner = checkTicTacToeWinner(tictactoeBoard);
+        if (winner) {
+            if (winner === 'X' && tictactoeMySymbol === 'X') {
+                document.getElementById('tictactoe-status').innerText = 'You win! +1 Karma';
+                updateKarmaCount(currentUserPhone);
+            } else if (winner === 'O' && tictactoeMySymbol === 'O') {
+                document.getElementById('tictactoe-status').innerText = 'You win! +1 Karma';
+                updateKarmaCount(currentUserPhone);
+            } else if (winner === 'draw') {
+                document.getElementById('tictactoe-status').innerText = 'Draw!';
+            } else {
+                document.getElementById('tictactoe-status').innerText = 'Computer wins!';
+            }
+            return;
+        }
+        tictactoeTurn = tictactoeMySymbol;
+        document.getElementById('tictactoe-status').innerText = 'Your turn';
     }
 
     function checkTicTacToeWinner(board) {
@@ -2050,7 +2060,7 @@
     }
 
     function resetTicTacToe() {
-        if (currentGameId) {
+        if (currentGameId && currentGameId !== 'local') {
             db.collection("games").doc(currentGameId).delete();
             if (gameListener) gameListener();
         }
@@ -2065,196 +2075,116 @@
         renderTicTacToeBoard();
         document.getElementById('tictactoe-status').innerText = 'Your turn (vs Computer)';
         currentGameId = 'local';
-        // Override make move for local
-        window.makeTicTacToeMove = function(index) {
-            if (tictactoeBoard[index] !== '' || tictactoeTurn !== 'X') return;
-            tictactoeBoard[index] = 'X';
-            renderTicTacToeBoard();
-            const winner = checkTicTacToeWinner(tictactoeBoard);
-            if (winner) {
-                if (winner === 'X') {
-                    document.getElementById('tictactoe-status').innerText = 'You win! +1 Karma';
-                    updateKarmaCount(currentUserPhone);
-                } else if (winner === 'O') {
-                    document.getElementById('tictactoe-status').innerText = 'Computer wins!';
-                } else {
-                    document.getElementById('tictactoe-status').innerText = 'Draw!';
-                }
-                return;
-            }
-            tictactoeTurn = 'O';
-            document.getElementById('tictactoe-status').innerText = 'Computer thinking...';
-            setTimeout(computerMoveTicTacToe, 500);
-        };
     }
 
-    function computerMoveTicTacToe() {
-        const emptyIndices = tictactoeBoard.reduce((acc, cell, idx) => cell === '' ? [...acc, idx] : acc, []);
-        if (emptyIndices.length === 0) return;
-        const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-        tictactoeBoard[move] = 'O';
-        renderTicTacToeBoard();
-        const winner = checkTicTacToeWinner(tictactoeBoard);
-        if (winner) {
-            if (winner === 'X') {
-                document.getElementById('tictactoe-status').innerText = 'You win! +1 Karma';
-                updateKarmaCount(currentUserPhone);
-            } else if (winner === 'O') {
-                document.getElementById('tictactoe-status').innerText = 'Computer wins!';
-            } else {
-                document.getElementById('tictactoe-status').innerText = 'Draw!';
+    // ---------- Snake Game ----------
+    function startSnake() {
+        snakeCanvas = document.getElementById('snake-canvas');
+        ctx = snakeCanvas.getContext('2d');
+        snake = [
+            {x: 10, y: 10},
+            {x: 9, y: 10},
+            {x: 8, y: 10}
+        ];
+        direction = 'RIGHT';
+        nextDirection = 'RIGHT';
+        score = 0;
+        document.getElementById('snake-status').innerText = `Score: ${score}`;
+        generateFood();
+        if (gameInterval) clearInterval(gameInterval);
+        gameRunning = true;
+        gameInterval = setInterval(gameLoop, 150);
+        window.addEventListener('keydown', handleSnakeKey);
+    }
+
+    function generateFood() {
+        const max = 20;
+        while (true) {
+            const x = Math.floor(Math.random() * max);
+            const y = Math.floor(Math.random() * max);
+            if (!snake.some(segment => segment.x === x && segment.y === y)) {
+                food = {x, y};
+                break;
             }
+        }
+    }
+
+    function gameLoop() {
+        if (!gameRunning) return;
+        moveSnake();
+        drawCanvas();
+    }
+
+    function moveSnake() {
+        direction = nextDirection;
+        const head = {...snake[0]};
+        switch(direction) {
+            case 'RIGHT': head.x++; break;
+            case 'LEFT': head.x--; break;
+            case 'UP': head.y--; break;
+            case 'DOWN': head.y++; break;
+        }
+        // Check wall collision
+        if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+            gameOver();
             return;
         }
-        tictactoeTurn = 'X';
-        document.getElementById('tictactoe-status').innerText = 'Your turn';
-    }
-
-    // Rock Paper Scissors
-    function findRPSOpponent() {
-        const status = document.getElementById('rps-status');
-        status.innerText = 'Looking for opponent...';
-        db.collection("gameQueue").where("game", "==", "rps").where("status", "==", "waiting").limit(1).get().then(snapshot => {
-            if (!snapshot.empty) {
-                const queueDoc = snapshot.docs[0];
-                const gameId = queueDoc.id;
-                db.collection("games").doc(gameId).update({
-                    player2: currentUserPhone,
-                    player2Name: currentUser,
-                    status: "playing"
-                }).then(() => {
-                    currentGameId = gameId;
-                    status.innerText = 'Opponent found! Make your choice.';
-                    listenToRPSGame(gameId);
-                });
-                queueDoc.ref.delete();
-            } else {
-                const gameRef = db.collection("games").doc();
-                gameRef.set({
-                    game: "rps",
-                    player1: currentUserPhone,
-                    player1Name: currentUser,
-                    player2: null,
-                    status: "waiting",
-                    choice1: null,
-                    choice2: null,
-                    createdAt: Date.now()
-                }).then(() => {
-                    db.collection("gameQueue").doc(gameRef.id).set({
-                        game: "rps",
-                        status: "waiting",
-                        createdAt: Date.now()
-                    });
-                    currentGameId = gameRef.id;
-                    status.innerText = 'Waiting for opponent... You can play vs computer instead.';
-                    listenToRPSGame(gameRef.id);
-                });
-            }
-        });
-    }
-
-    function listenToRPSGame(gameId) {
-        if (rpsListener) rpsListener();
-        rpsListener = db.collection("games").doc(gameId).onSnapshot(doc => {
-            if (!doc.exists) {
-                closeGame('rps');
-                return;
-            }
-            const data = doc.data();
-            if (data.status === 'waiting') {
-                document.getElementById('rps-status').innerText = 'Waiting for opponent...';
-                return;
-            }
-            if (data.choice1 && data.choice2) {
-                const p1 = data.choice1;
-                const p2 = data.choice2;
-                let result = '';
-                if (p1 === p2) result = 'draw';
-                else if (
-                    (p1 === 'rock' && p2 === 'scissors') ||
-                    (p1 === 'paper' && p2 === 'rock') ||
-                    (p1 === 'scissors' && p2 === 'paper')
-                ) result = 'player1';
-                else result = 'player2';
-                
-                const isPlayer1 = data.player1 === currentUserPhone;
-                let message = '';
-                if (result === 'draw') {
-                    message = 'It\'s a draw!';
-                } else if ((result === 'player1' && isPlayer1) || (result === 'player2' && !isPlayer1)) {
-                    message = 'You win! +1 Karma';
-                    updateKarmaCount(currentUserPhone);
-                } else {
-                    message = 'You lose!';
-                }
-                document.getElementById('rps-status').innerText = message + ` (You: ${isPlayer1 ? data.choice1 : data.choice2}, Opp: ${isPlayer1 ? data.choice2 : data.choice1})`;
-            } else {
-                document.getElementById('rps-status').innerText = 'Waiting for opponent\'s move...';
-            }
-        });
-    }
-
-    function playRPS(choice) {
-        if (!currentGameId) {
-            // Play vs computer
-            playVsComputerRPS(choice);
+        // Check self collision
+        if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
+            gameOver();
             return;
         }
-        db.collection("games").doc(currentGameId).get().then(doc => {
-            const data = doc.data();
-            const isPlayer1 = data.player1 === currentUserPhone;
-            const update = isPlayer1 ? { choice1: choice } : { choice2: choice };
-            db.collection("games").doc(currentGameId).update(update);
-        });
-    }
-
-    function resetRPS() {
-        if (currentGameId) {
-            db.collection("games").doc(currentGameId).delete();
-            if (rpsListener) rpsListener();
-        }
-        findRPSOpponent();
-    }
-
-    // Unified playVsComputerRPS function
-    function playVsComputerRPS(choice) {
-        if (choice === undefined) {
-            // Called from button without argument: reset for new game
-            document.getElementById('rps-status').innerText = 'Choose your move!';
-            currentGameId = null;
-            return;
-        }
-        // Actual game logic
-        const choices = ['rock', 'paper', 'scissors'];
-        const computerChoice = choices[Math.floor(Math.random() * 3)];
-        let result = '';
-        if (choice === computerChoice) result = 'draw';
-        else if (
-            (choice === 'rock' && computerChoice === 'scissors') ||
-            (choice === 'paper' && computerChoice === 'rock') ||
-            (choice === 'scissors' && computerChoice === 'paper')
-        ) result = 'win';
-        else result = 'lose';
-        
-        let message = '';
-        if (result === 'win') {
-            message = 'You win! +1 Karma';
-            updateKarmaCount(currentUserPhone);
-        } else if (result === 'lose') {
-            message = 'You lose!';
+        snake.unshift(head);
+        // Check food
+        if (head.x === food.x && head.y === food.y) {
+            score++;
+            document.getElementById('snake-status').innerText = `Score: ${score}`;
+            generateFood();
         } else {
-            message = 'Draw!';
+            snake.pop();
         }
-        document.getElementById('rps-status').innerText = `${message} (You: ${choice}, Computer: ${computerChoice})`;
     }
 
-    // Render function
+    function drawCanvas() {
+        ctx.clearRect(0, 0, 400, 400);
+        ctx.fillStyle = '#FF8C00';
+        snake.forEach(seg => {
+            ctx.fillRect(seg.x * 20, seg.y * 20, 18, 18);
+        });
+        ctx.fillStyle = '#EF4444';
+        ctx.fillRect(food.x * 20, food.y * 20, 18, 18);
+    }
+
+    function gameOver() {
+        gameRunning = false;
+        clearInterval(gameInterval);
+        document.getElementById('snake-status').innerText = `Game Over! Score: ${score}`;
+        // Give karma for reaching certain scores? optional
+        if (score >= 5) {
+            updateKarmaCount(currentUserPhone);
+            showToast('🐍 +1 Karma for score 5+!', 'success');
+        }
+    }
+
+    function handleSnakeKey(e) {
+        if (!gameRunning) return;
+        const key = e.key.replace('Arrow', '').toUpperCase();
+        if ((key === 'RIGHT' && direction !== 'LEFT') ||
+            (key === 'LEFT' && direction !== 'RIGHT') ||
+            (key === 'UP' && direction !== 'DOWN') ||
+            (key === 'DOWN' && direction !== 'UP')) {
+            nextDirection = key;
+        }
+    }
+
+    // Modified render to include Games tab
     function render() {
         const form = document.getElementById('form-content');
         if (!form) return;
         
         const scrollTimeHtml = `<div style="display:flex; gap:10px;"><div style="flex:1;"><label>Hours</label><select id="f-h"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div><div style="flex:1;"><label>Mins</label><select id="f-m"><option value="0">00</option><option value="15">15</option><option value="30" selected>30</option><option value="45">45</option></select></div></div>`;
         
+        // Games tab
         if (currentTab === 'games' && !isRunner) {
             form.innerHTML = `
                 <h3 style="margin-bottom:20px;">🎮 Play Games & Earn Karma</h3>
@@ -2264,79 +2194,78 @@
                         <span style="font-weight:800;">Tic Tac Toe</span>
                         <p style="font-size:0.7rem; color:var(--txt-dim);">Play vs friend or computer</p>
                     </div>
-                    <div class="cat-item" onclick="openRPS()">
-                        <span style="font-size:2rem;">✊✋✌️</span><br>
-                        <span style="font-weight:800;">Rock Paper Scissors</span>
-                        <p style="font-size:0.7rem; color:var(--txt-dim);">Quick match</p>
+                    <div class="cat-item" onclick="openSnake()">
+                        <span style="font-size:2rem;">🐍</span><br>
+                        <span style="font-weight:800;">Classic Snake</span>
+                        <p style="font-size:0.7rem; color:var(--txt-dim);">Single player, old school</p>
                     </div>
                 </div>
-                <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--txt-dim);">Win a game to earn +1 Karma!</p>
+                <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--txt-dim);">Win Tic Tac Toe to earn +1 Karma! Snake: 5+ points = +1 Karma</p>
             `;
             return;
         }
         
-        // Only show form in requester mode and non-games tabs
-        if (!isRunner) {
-            if (currentTab === 'errand') {
-                form.innerHTML = `
-                    <div class="category-grid">
-                        <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')"><span class="cat-icon">📦</span><span class="cat-label">Parcel</span></div>
-                        <div class="cat-item" onclick="quickFill('🍔 Burger/Food', '🏛️ Adda')"><span class="cat-icon">🍔</span><span class="cat-label">Burger</span></div>
-                        <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')"><span class="cat-icon">🚬</span><span class="cat-label">Sutta</span></div>
-                    </div>
-                    <label>Location</label>
-                    <select id="f-hub">
-                        <option>🚪 Main Gate</option>
-                        <option>🏛️ Adda</option>
-                        <option>☕ Tapri</option>
-                        <option>✈️ Shamshabad</option>
-                    </select>
-                    
-                    <label>What do you need?</label>
-                    <input type="text" id="f-task" placeholder="e.g. Need a pen for the exam">
-                    
-                    <label>Reward</label>
-                    <select id="f-reward">
-                        <option value="A Huge Thanks! 🙌">A Huge Thanks! 🙌</option>
-                        <option value="I owe you one! 🤝">I owe you one! 🤝</option>
-                        <option value="Coffee on me later ☕">Coffee on me later ☕</option>
-                        <option value="A quick snack 🍪">A quick snack 🍪</option>
-                        <option value="Eternal Gratitude ✨">Eternal Gratitude ✨</option>
-                        <option value="Chai Sutta ☕">Chai Sutta ☕</option>
-                    </select>
-                    
-                    <label>Vanish in</label>
-                    ${scrollTimeHtml}
-                    
-                    <button onclick="postMission()" class="btn-main">🚀 Broadcast Request</button>`;
-            } else if (currentTab === 'ride') {
-                form.innerHTML = `
-                    <label>Destination</label>
-                    <select id="f-airport">
-                        <option>🛫 RGIA Airport</option>
-                        <option>🚂 Secunderabad</option>
-                        <option>✈️ Shamshabad</option>
-                        <option>🏙️ Hi-Tech City</option>
-                    </select>
-                    
-                    <label>Pillar #</label>
-                    <input type="text" id="f-pillar" placeholder="e.g. Pillar 7">
-                    
-                    <label>Departure in</label>
-                    ${scrollTimeHtml}
-                    
-                    <label>Share Type</label>
-                    <select id="f-reward">
-                        <option value="Split the fare 🚖">Split the fare 🚖</option>
-                        <option value="Coffee on me ☕">Coffee on me ☕</option>
-                        <option value="Snacks on me 🍟">Snacks on me 🍟</option>
-                    </select>
-                    
-                    <button onclick="postMission()" class="btn-main">🚖 Find Partner</button>`;
-            }
-        } else {
-            // In runner mode, clear the form content (hide it)
+        // In runner mode, clear the form (no posting)
+        if (isRunner) {
             form.innerHTML = '';
+        } 
+        // In requester mode, show appropriate form
+        else if (currentTab === 'errand') {
+            form.innerHTML = `
+                <div class="category-grid">
+                    <div class="cat-item" onclick="quickFill('📦 Parcel Pickup', '🚪 Main Gate')"><span class="cat-icon">📦</span><span class="cat-label">Parcel</span></div>
+                    <div class="cat-item" onclick="quickFill('🍔 Burger/Food', '🏛️ Adda')"><span class="cat-icon">🍔</span><span class="cat-label">Burger</span></div>
+                    <div class="cat-item" onclick="quickFill('🚬 Sutta/Smoke', '☕ Tapri')"><span class="cat-icon">🚬</span><span class="cat-label">Sutta</span></div>
+                </div>
+                <label>Location</label>
+                <select id="f-hub">
+                    <option>🚪 Main Gate</option>
+                    <option>🏛️ Adda</option>
+                    <option>☕ Tapri</option>
+                    <option>✈️ Shamshabad</option>
+                </select>
+                
+                <label>What do you need?</label>
+                <input type="text" id="f-task" placeholder="e.g. Need a pen for the exam">
+                
+                <label>Reward</label>
+                <select id="f-reward">
+                    <option value="A Huge Thanks! 🙌">A Huge Thanks! 🙌</option>
+                    <option value="I owe you one! 🤝">I owe you one! 🤝</option>
+                    <option value="Coffee on me later ☕">Coffee on me later ☕</option>
+                    <option value="A quick snack 🍪">A quick snack 🍪</option>
+                    <option value="Eternal Gratitude ✨">Eternal Gratitude ✨</option>
+                    <option value="Chai Sutta ☕">Chai Sutta ☕</option>
+                </select>
+                
+                <label>Vanish in</label>
+                ${scrollTimeHtml}
+                
+                <button onclick="postMission()" class="btn-main">🚀 Broadcast Request</button>`;
+        } else if (currentTab === 'ride') {
+            form.innerHTML = `
+                <label>Destination</label>
+                <select id="f-airport">
+                    <option>🛫 RGIA Airport</option>
+                    <option>🚂 Secunderabad</option>
+                    <option>✈️ Shamshabad</option>
+                    <option>🏙️ Hi-Tech City</option>
+                </select>
+                
+                <label>Pillar #</label>
+                <input type="text" id="f-pillar" placeholder="e.g. Pillar 7">
+                
+                <label>Departure in</label>
+                ${scrollTimeHtml}
+                
+                <label>Share Type</label>
+                <select id="f-reward">
+                    <option value="Split the fare 🚖">Split the fare 🚖</option>
+                    <option value="Coffee on me ☕">Coffee on me ☕</option>
+                    <option value="Snacks on me 🍟">Snacks on me 🍟</option>
+                </select>
+                
+                <button onclick="postMission()" class="btn-main">🚖 Find Partner</button>`;
         }
 
         const feed = document.getElementById('mission-feed');
@@ -2433,4 +2362,3 @@
 </script>
 </body>
 </html>
-
